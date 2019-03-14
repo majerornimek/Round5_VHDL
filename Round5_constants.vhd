@@ -6,11 +6,11 @@ use ieee.numeric_std.all;
 package Round5_constants is
 	constant LongModLen		: integer := 12;
 	constant ShortModLen	: integer := 9;
-	constant PolyDegree		: integer := 15;--618;
+	constant PolyDegree		: integer := 618;--618;
 	constant PolyDegreeLog2	: integer := 11;
 	
 	constant NumOfMulUnits	: integer := PolyDegree;
-	
+	constant ShortPolyMask	: std_logic_vector(LongModLen-2 downto 0) := "00011111111";
 	----- CONSTANTS FOR ROUNDING ------
 	constant a_bits_enc1 	: integer := 11;
 	constant a_bits_enc2 	: integer := 8;
@@ -34,7 +34,7 @@ package Round5_constants is
 	type NTRUPoly	is array(natural range<>) of std_logic_vector(LongModLen-2 downto 0);
 	type ShortPoly	is array(natural range<>) of std_logic_vector(ShortModLen-2 downto 0);
 
-    type bus_array is array(natural range <>) of std_logic_vector;
+    --type bus_array is array(natural range <>) of std_logic_vector;
 	
 
 end package;

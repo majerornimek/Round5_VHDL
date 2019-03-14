@@ -8,14 +8,14 @@ use work.Round5_constants.all;
 
 entity Mul_Poly_NTRU is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree-1 downto 0);
-		PolyB	: in Trinomial(PolyDegree-1 downto 0);
+		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyB	: in Trinomial(PolyDegree downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree-1 downto 0);
-		ShortRes: out ShortPoly(PolyDegree-1 downto 0)
+		LongRes	: out NTRUPoly(PolyDegree downto 0);
+		ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end entity;
 
@@ -33,9 +33,9 @@ component Mul_Poly_NTRU_tri_unit is
 	);
 end component;
 
-signal shift_A : NTRUPoly(PolyDegree-1 downto 0);		-- shift registers to store polynomials
-signal shift_B : Trinomial(PolyDegree-1 downto 0);		-- shift registers to store polynomials
-signal result_poly		: NTRUPoly(PolyDegree-1 downto 0);
+signal shift_A : NTRUPoly(PolyDegree downto 0);		-- shift registers to store polynomials
+signal shift_B : Trinomial(PolyDegree downto 0);		-- shift registers to store polynomials
+signal result_poly		: NTRUPoly(PolyDegree downto 0);
 signal Shift_counter	: std_logic_vector(PolyDegreeLog2-1 downto 0);
 
 signal started	: std_logic; 									--indicate if multiplication started
@@ -43,7 +43,7 @@ signal Rst_mul 	: std_logic;
 
 begin
 	
-PM: for i in 0 to PolyDegree-1 generate
+PM: for i in 0 to PolyDegree generate
 		Muli : Mul_Poly_NTRU_tri_unit 
 			port map(
 				A => shift_A(i),
@@ -102,7 +102,7 @@ begin
 				shift_A <= PolyA;
 				started <= '1';
 			else
-				shift_A <= shift_A(PolyDegree-2 downto 0) & shift_A(PolyDegree-1);
+				shift_A <= shift_A(PolyDegree-1 downto 0) & shift_A(PolyDegree);
 			end if;
 		else
 			started <= '0';
@@ -119,7 +119,7 @@ begin
 			if started = '0' then
 				shift_B <= PolyB;
 			else
-				shift_B <= shift_B(PolyDegree-2 downto 0) & shift_B(PolyDegree-1);
+				shift_B <= shift_B(PolyDegree-1 downto 0) & shift_B(PolyDegree);
 			end if;
 		else
 			shift_B <= (others=> (others=> '0'));
