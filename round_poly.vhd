@@ -29,7 +29,7 @@ component round_element is
 	generic(
 		InputWidth 	: integer := 11;
 		OutputWidth	: integer := 8;
-		b_mask		: std_logic_vector(OutputWidth-1 downto 0) := x"fffffff";
+		b_mask		: std_logic_vector(7 downto 0) := (others => '1');
 		round_const	: integer := 4
 	);
 	port (
