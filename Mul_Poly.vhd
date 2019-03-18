@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.Round5_constants.all;
-
+ 
 entity Mul_Poly is 
 	port (
 		PolyA	: in NTRUPoly(PolyDegree downto 0);
@@ -89,7 +89,7 @@ begin
 	liftand: for i in 0 to PolyDegree generate
 		short_lifted_and(i) <= Long_lifted(i) and ShortPolyMask;
 		short_mul_and(i)	<= long_mul(i) and ShortPolyMask;
-	end generate liftand;
+	end generate liftand; 
 	
 	with OpType select PolyA_to_mul <=
 		Long_lifted 		when '1',
