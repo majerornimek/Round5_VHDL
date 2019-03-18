@@ -18,7 +18,7 @@ entity Mul_Poly_NTRU is
 		ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end entity;
-
+ 
 architecture a1 of Mul_Poly_NTRU is
 
 component Mul_Poly_NTRU_tri_unit is 
@@ -37,9 +37,13 @@ signal shift_A : NTRUPoly(PolyDegree downto 0);		-- shift registers to store pol
 signal shift_B : Trinomial(PolyDegree downto 0);		-- shift registers to store polynomials
 signal result_poly		: NTRUPoly(PolyDegree downto 0);
 signal Shift_counter	: std_logic_vector(PolyDegreeLog2-1 downto 0);
-
+signal LongResTmp   : NTRUPoly(PolyDegree downto 0); 
 signal started	: std_logic; 									--indicate if multiplication started
 signal Rst_mul 	: std_logic;
+
+signal LongResTmp2 : NTRUPoly(PolyDegree downto 0);
+signal ShortResTmp2 : ShortPoly(PolyDegree downto 0);
+
 
 begin
 	
@@ -51,11 +55,24 @@ PM: for i in 0 to PolyDegree generate
 				clk => clk,
 				Start => Start,
 				Rst => Rst_mul,
-				LongRes => LongRes(i),
-				ShortRes => ShortRes(i)
+				LongRes => LongResTmp2(i),--((2*i) mod PolyDegree),
+				ShortRes => ShortResTmp2(i)--((2*i) mod PolyDegree)
 			);
 	end generate PM;
 	
+	
+	oo: for i in 0 to PolyDegree generate
+	   ol: if (i+i) < PolyDegree generate
+	       LongRes(i+i) <= LongResTmp2(i);
+	       ShortRes(i+i)  <= ShortResTmp2(i);
+	   end generate ol;
+	   
+	   oll: if (2*i) > PolyDegree generate
+	       LongRes(2*i - (PolyDegree)) <= LongResTmp2(i);
+	       ShortRes(2*i- (PolyDegree))  <= ShortResTmp2(i);
+	   end generate oll;
+	   
+	end generate oo;
 
 counter: process(Rst, clk)
 begin
@@ -64,7 +81,7 @@ begin
 		Done <= '0';
 	elsif clk'event and clk = '1' then
 		if Started = '1' then
-			if unsigned(Shift_counter) /= PolyDegree then
+			if unsigned(Shift_counter) /= PolyDegree-1 then
 				Shift_counter <= Shift_counter + '1';
 				Done <= '0';
 			else
@@ -119,7 +136,7 @@ begin
 			if started = '0' then
 				shift_B <= PolyB;
 			else
-				shift_B <= shift_B(PolyDegree-1 downto 0) & shift_B(PolyDegree);
+				shift_B <= shift_B(0) & shift_B(PolyDegree downto 1);
 			end if;
 		else
 			shift_B <= (others=> (others=> '0'));

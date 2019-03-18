@@ -18,7 +18,7 @@ entity Mul_Poly_NTRU_tri_unit is
 		ShortRes: out std_logic_vector(ShortModLen-2 downto 0)
 	);
 end entity;
-
+ 
 
 architecture a1 of Mul_Poly_NTRU_tri_unit is 
 

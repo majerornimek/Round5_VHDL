@@ -1,0 +1,17 @@
+Tytuł: A Hardware Performance Overview of Round5 - a Post-Quantum PKC
+
+Abstract: 
+
+We describe a generic hardware architecture for the lattice based, post quantum public key scheme named Round5. 
+As mentioned by Round5 authors, this scheme can be adapted to various use cases, ranging from low security implementation on low power devices, to high performance devices operating on highest security level parameters. 
+
+
+
+We tested and measured the performance and logic requirements of our implementation on Intel (Altera) and Xilinx FPGAs. 
+We report the performance for high speed implementation and also for implemenation targeting for minimal resources requirements. 
+We describe the speed-area tradeoffs for the onmentioned scheme with explanation how to achieve the choosen results by modyfing described architecture.
+
+The described architecture offer CPA PKE, but can be adopted to CCA PKE and CCA KEM.
+
+
+The integration of our XMSS accelerators into an embedded RISC-V processor enables post-quantum secure signatures for a large variety of embedded applications. 
