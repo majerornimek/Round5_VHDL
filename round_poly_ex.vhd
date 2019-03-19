@@ -14,8 +14,7 @@ entity round_poly_ex is
 		OutputWidth	: integer := b_bits_enc1
 	);
 	port(
-		PolyA		: in bus_array(PolyDegree-1 downto 0)(InputWidth-1 downto 0);
-		InputMask	: in std_logic_vector(InputWidth-1 downto 0);
+		PolyA		: in bus_array(PolyDegree-1 downto 0)(a_bits_enc1-1 downto 0);
 		InputConst	: in std_logic_vector(3 downto 0);
 		clk 		: in std_logic;
 		PolyEnc1	: out bus_array(PolyDegree-1 downto 0)(b_bits_enc1-1 downto 0);
@@ -29,12 +28,10 @@ end entity;
 architecture a1 of round_poly_ex is
 component round_element_ex is	
 	generic(
-		InputWidth 	: integer := 11;
-		OutputWidth	: integer := 8
+		InputWidth 	: integer := 11
 	);
 	port (
 		InputElement	: in std_logic_vector(InputWidth-1 downto 0);
-		Mask		: in std_logic_vector(InputWidth-1 downto 0);
 		Const		: in std_logic_vector(3 downto 0);
 		clk				: in std_logic;
 		OutElement_enc1	: out std_logic_vector(b_bits_enc1-1 downto 0);
@@ -47,12 +44,10 @@ begin
 	ro: for i in 0 to PolyDegree-1 generate
 		re: round_element_ex
 			generic map(
-				InputWidth 	=> InputWidth,
-				OutputWidth	=> OutputWidth
+				InputWidth 	=> InputWidth
 			)
 			port map(
 				InputElement => PolyA(i),
-				Mask => InputMask,
 				Const => InputConst,
 				clk => clk,
 				OutElement_enc1 => PolyEnc1(i),

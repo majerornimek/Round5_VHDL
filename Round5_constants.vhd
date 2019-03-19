@@ -20,13 +20,13 @@ package Round5_constants is
 	constant b_bits_enc2 	: integer := 4;
 	constant b_bits_dec1 	: integer := 1;
 	
-	constant b_mask_enc1 	: std_logic_vector(b_bits_enc1-1 downto 0) := (others => '1');
-	constant b_mask_enc2 	: std_logic_vector(b_bits_enc2-1 downto 0) := (others => '1');
-	constant b_mask_dec1 	: std_logic_vector(b_bits_dec1-1 downto 0) := (others => '1');
+	constant b_mask_enc1 	: std_logic_vector(a_bits_enc1-1 downto 0) := "00011111111";
+	constant b_mask_enc2 	: std_logic_vector(a_bits_enc2-1 downto 0) := "00001111";
+	constant b_mask_dec1 	: std_logic_vector(a_bits_dec1-1 downto 0) := "00000001";
 	
-	constant r_const_enc1 	: integer := 4;
-	constant r_const_enc2 	: integer := 4;
-	constant r_const_dec1 	: integer := 68;
+	constant r_const_enc1 	: std_logic_vector(3 downto 0) := "0100";
+	constant r_const_enc2 	: std_logic_vector(3 downto 0) := "0100";
+	constant r_const_dec1 	: std_logic_vector(6 downto 0) := "1000100";
 	----- CONSTANTS FOR ROUNDING ------
 	
 	
@@ -34,7 +34,7 @@ package Round5_constants is
 	type NTRUPoly	is array(natural range<>) of std_logic_vector(LongModLen-2 downto 0);
 	type ShortPoly	is array(natural range<>) of std_logic_vector(ShortModLen-2 downto 0);
 
-    --type bus_array is array(natural range <>) of std_logic_vector;
+   type bus_array is array(natural range <>) of std_logic_vector;
 	
 
 end package;

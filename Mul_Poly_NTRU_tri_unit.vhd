@@ -14,8 +14,7 @@ entity Mul_Poly_NTRU_tri_unit is
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
-		LongRes	: out std_logic_vector(LongModLen-2 downto 0);
-		ShortRes: out std_logic_vector(ShortModLen-2 downto 0)
+		LongRes	: out std_logic_vector(LongModLen-2 downto 0)
 	);
 end entity;
  
@@ -26,15 +25,25 @@ architecture a1 of Mul_Poly_NTRU_tri_unit is
 
 signal long_tmp_acc		: signed(LongModLen downto 0);--signed(LongModLen downto 0);
 signal short_tmp_acc	: signed(ShortModLen downto 0);
-signal mul_res			: signed(LongModLen downto 0);
+signal mul_res			: signed(LongModLen-2 downto 0);
 
 signal LongResTmp		: std_logic_vector(LongModLen downto 0);
-signal ShortResTmp		: std_logic_vector(ShortModLen-2 downto 0);
+--signal ShortResTmp		: std_logic_vector(ShortModLen-2 downto 0);
+
+constant ones	: std_logic_vector(LongModLen-2 downto 0) := (others => '1');
+constant zeros	: std_logic_vector(LongModLen-2 downto 0) := (others => '0');
+signal   B_mask : std_logic_vector(LongModLen-2 downto 0);
+signal   val_mask : std_logic_vector(LongModLen-2 downto 0);
+
 begin
 
-
-mul_res <= signed(A) * signed(B);
-
+with B(1) select B_mask <=
+	not A + '1' when '1',
+	A when others;
+	
+with B(0) select mul_res <=
+	signed(B_mask) when '1',
+	signed(zeros) when others;
 
 process(Rst, clk)
 begin
@@ -49,7 +58,7 @@ end process;
 LongResTmp <= Std_logic_vector(long_tmp_acc);
 
 LongRes <= LongResTmp(LongModLen-2 downto 0);
-ShortRes <= LongResTmp(ShortModLen-2 downto 0);
+--ShortRes <= LongResTmp(ShortModLen-2 downto 0);
 
 
 end a1;

@@ -30,8 +30,8 @@ component Mul_Poly_NTRU is
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out NTRUPoly(PolyDegree downto 0)
+		--ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end component;
 
@@ -74,8 +74,8 @@ begin
 		Start	=> start_mul,
 		Rst		=> rst,
 		Done	=> done_mul,
-		LongRes	=> long_mul,
-		ShortRes=> short_mul
+		LongRes	=> long_mul
+		--ShortRes=> short_mul
 	);
 	
 	unlft: Unlift_Poly port map(
@@ -104,8 +104,12 @@ begin
 	begin
 		if clk'event and clk = '1' then
 			if Start = '1' then
-				if counter = 0 or done_mul = '1' then
-					counter <= counter + '1';
+				if counter = 0 then
+					counter <= "0001";
+				elsif counter = "0001" then
+					if done_mul = '1' then
+						counter <= "0010";
+					end if;
 				else
 					
 				end if;
@@ -119,10 +123,8 @@ begin
 	begin
 		if clk'event and clk = '1' then
 			if Start = '1' then
-				if counter = 1 and done_mul /= '1' then
+				if counter = 1 then --and done_mul /= '1' then
 					Start_mul <= '1';
-				else
-					Start_mul <= '0';
 				end if;
 			else
 				Start_mul <= '0'; 
@@ -134,7 +136,7 @@ begin
 	begin
 		if clk'event and clk = '1' then
 			if Start = '1' then
-				if counter = 2 then
+				if counter >= 2 then
 					start_unlift <= '1';
 				else
 					start_unlift <= '0';

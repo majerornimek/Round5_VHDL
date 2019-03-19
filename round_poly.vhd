@@ -13,7 +13,7 @@ entity round_poly is
 		InputWidth 	: integer := a_bits_enc1;
 		OutputWidth	: integer := b_bits_enc1;
 		b_mask		: std_logic_vector := b_mask_enc1;
-		round_const	: integer := r_const_enc1
+		round_const	: std_logic_vector := r_const_enc1
 	);
 	port(
 		PolyA		: in bus_array(PolyDegree-1 downto 0)(InputWidth-1 downto 0);
@@ -30,7 +30,7 @@ component round_element is
 		InputWidth 	: integer := 11;
 		OutputWidth	: integer := 8;
 		b_mask		: std_logic_vector(7 downto 0) := (others => '1');
-		round_const	: integer := 4
+		round_const	: std_logic_vector := "0100"
 	);
 	port (
 		InputElement	: std_logic_vector(InputWidth-1 downto 0);

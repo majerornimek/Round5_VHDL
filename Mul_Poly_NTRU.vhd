@@ -14,8 +14,8 @@ entity Mul_Poly_NTRU is
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out NTRUPoly(PolyDegree downto 0)
+		--ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end entity;
  
@@ -28,8 +28,7 @@ component Mul_Poly_NTRU_tri_unit is
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
-		LongRes	: out std_logic_vector(LongModLen-2 downto 0);
-		ShortRes: out std_logic_vector(ShortModLen-2 downto 0)
+		LongRes	: out std_logic_vector(LongModLen-2 downto 0)
 	);
 end component;
 
@@ -43,7 +42,7 @@ signal Rst_mul 	: std_logic;
 
 signal LongResTmp2 : NTRUPoly(PolyDegree downto 0);
 signal ShortResTmp2 : ShortPoly(PolyDegree downto 0);
-
+signal Start_mul	: std_logic;
 
 begin
 	
@@ -53,23 +52,23 @@ PM: for i in 0 to PolyDegree generate
 				A => shift_A(i),
 				B => shift_B(i),
 				clk => clk,
-				Start => Start,
+				Start => Start_mul,
 				Rst => Rst_mul,
-				LongRes => LongResTmp2(i),--((2*i) mod PolyDegree),
-				ShortRes => ShortResTmp2(i)--((2*i) mod PolyDegree)
+				LongRes => LongResTmp2(i)--((2*i) mod PolyDegree),
+				--ShortRes => ShortResTmp2(i)--((2*i) mod PolyDegree)
 			);
 	end generate PM;
 	
 	
 	oo: for i in 0 to PolyDegree generate
 	   ol: if (i+i) < PolyDegree generate
-	       LongRes(i+i) <= LongResTmp2(i);
-	       ShortRes(i+i)  <= ShortResTmp2(i);
+	       LongRes(i+i+1) <= LongResTmp2(i);
+	       --ShortRes(i+i+1)  <= ShortResTmp2(i);
 	   end generate ol;
 	   
-	   oll: if (2*i) > PolyDegree generate
+	   oll: if (2*i) >= PolyDegree generate
 	       LongRes(2*i - (PolyDegree)) <= LongResTmp2(i);
-	       ShortRes(2*i- (PolyDegree))  <= ShortResTmp2(i);
+	       --ShortRes(2*i- (PolyDegree))  <= ShortResTmp2(i);
 	   end generate oll;
 	   
 	end generate oo;
@@ -81,11 +80,13 @@ begin
 		Done <= '0';
 	elsif clk'event and clk = '1' then
 		if Started = '1' then
-			if unsigned(Shift_counter) /= PolyDegree-1 then
+			if unsigned(Shift_counter) /= PolyDegree+1 then
 				Shift_counter <= Shift_counter + '1';
 				Done <= '0';
+				Start_mul <= '1';
 			else
 				Done <= '1';
+				Start_mul <= '0';
 			end if;
 		else
 			Shift_counter <= (others => '0');

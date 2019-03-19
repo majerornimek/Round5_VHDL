@@ -11,7 +11,7 @@ entity round_element is
 	generic(
 		InputWidth 	: integer := 11;
 		OutputWidth	: integer := 8;
-		b_mask		: std_logic_vector(natural range<>) := x"fffffff";
+		b_mask		: std_logic_vector(natural range<>) := (others => '0');
 		round_const	: integer := 4
 	);
 	port (
