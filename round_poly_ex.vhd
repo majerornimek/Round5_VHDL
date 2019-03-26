@@ -14,12 +14,12 @@ entity round_poly_ex is
 		OutputWidth	: integer := b_bits_enc1
 	);
 	port(
-		PolyA		: in bus_array(PolyDegree-1 downto 0)(a_bits_enc1-1 downto 0);
-		InputConst	: in std_logic_vector(3 downto 0);
+		PolyA		: in q_bitsPoly(PolyDegree-1 downto 0);
+		InputConst	: in std_logic_vector(6 downto 0);
 		clk 		: in std_logic;
-		PolyEnc1	: out bus_array(PolyDegree-1 downto 0)(b_bits_enc1-1 downto 0);
-		PolyEnc2	: out bus_array(PolyDegree-1 downto 0)(b_bits_enc2-1 downto 0);
-		PolyDec1	: out bus_array(PolyDegree-1 downto 0)(b_bits_dec1-1 downto 0)
+		PolyEnc1	: out P_bitsPoly(PolyDegree-1 downto 0);
+		PolyEnc2	: out t_bitsPoly(PolyDegree-1 downto 0);
+		PolyDec1	: out std_logic_vector(PolyDegree-1 downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
 	);
 	
 end entity;
@@ -32,11 +32,11 @@ component round_element_ex is
 	);
 	port (
 		InputElement	: in std_logic_vector(InputWidth-1 downto 0);
-		Const		: in std_logic_vector(3 downto 0);
+		Const		    : in std_logic_vector(6 downto 0);
 		clk				: in std_logic;
-		OutElement_enc1	: out std_logic_vector(b_bits_enc1-1 downto 0);
+		OutElement_enc1	: out std_logic_vector(p_bits-1 downto 0);
 		OutElement_enc2	: out std_logic_vector(b_bits_enc2-1 downto 0);
-		OutElement_dec1	: out std_logic_vector(b_bits_dec1-1 downto 0)
+		OutElement_dec1	: out std_logic--_vector(b_bits_dec1-1 downto 0)
 	);
 end component;
 

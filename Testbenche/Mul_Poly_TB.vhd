@@ -19,8 +19,7 @@ component Mul_Poly is
 		Rst		: in std_logic;
 		OpType	: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out NTRUPoly(PolyDegree downto 0)
 	);
 end component;
 signal inA, outC : NTRUPoly(PolyDegree downto 0);
@@ -48,8 +47,7 @@ begin
 		Rst		=> rst_tmp,
 		OpType	=> op_tmp,
 		Done	=> done_tmp,
-		LongRes	=> outC,
-		ShortRes=> outS
+		LongRes	=> outC
    );
    
 process

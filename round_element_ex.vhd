@@ -13,11 +13,11 @@ entity round_element_ex is
 	);
 	port (
 		InputElement		: in std_logic_vector(InputWidth-1 downto 0);
-		Const					: in std_logic_vector(3 downto 0);
+		Const					: in std_logic_vector(6 downto 0);
 		clk					: in std_logic;
 		OutElement_enc1	: out std_logic_vector(b_bits_enc1-1 downto 0);
 		OutElement_enc2	: out std_logic_vector(b_bits_enc2-1 downto 0);
-		OutElement_dec1	: out std_logic_vector(b_bits_dec1-1 downto 0)
+		OutElement_dec1	: out std_logic--_vector(b_bits_dec1-1 downto 0)
 	);
 end entity;
 
@@ -32,7 +32,7 @@ tmp_x <= InputElement + Const;
 
 OutElement_enc1 <= tmp_x(a_bits_enc1-1 downto a_bits_enc1-b_bits_enc1);
 OutElement_enc2 <= tmp_x(a_bits_enc2-1 downto a_bits_enc2-b_bits_enc2);
-OutElement_dec1 <= tmp_x(a_bits_dec1-1 downto a_bits_dec1-b_bits_dec1);
+OutElement_dec1 <= tmp_x(a_bits_dec1-1);-- downto a_bits_dec1-b_bits_dec1);
 
 
 end a1;

@@ -8,15 +8,14 @@ use work.Round5_constants.all;
  
 entity Mul_Poly is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		PolyB	: in Trinomial(PolyDegree downto 0); 
 		clk		: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		OpType	: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0)
 	);
 end entity;
 
@@ -24,39 +23,40 @@ end entity;
 architecture a1 of Mul_Poly is
 component Mul_Poly_NTRU is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		PolyB	: in Trinomial(PolyDegree downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0)
 		--ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end component;
 
 component Lift_Poly is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		clk 	: in std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0);
+		ShortRes: out p_bitsPoly(PolyDegree downto 0)
 	);
 end component;
 
 component Unlift_Poly is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		Done 	: out std_logic;
+		LongRes	: out q_bitsPoly(PolyDegree downto 0)
+		--ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end component;
 
-signal Long_lifted, PolyA_to_mul, long_mul, to_unlift, Short_lifted_and, short_mul_and : NTRUPoly(PolyDegree downto 0);
-signal Short_lited, short_mul							: ShortPoly(PolyDegree downto 0);
-signal done_mul, Start_unlift, start_mul : std_logic;
+signal Long_lifted, PolyA_to_mul, long_mul, to_unlift, Short_lifted_and, short_mul_and : q_bitsPoly(PolyDegree downto 0);
+signal Short_lited, short_mul							: p_bitsPoly(PolyDegree downto 0);
+signal done_mul, Start_unlift, start_mul, done_u : std_logic;
 signal counter : std_logic_vector(3 downto 0);
 begin
 
@@ -82,8 +82,9 @@ begin
 		PolyA	=> to_unlift,
 		clk 	=> clk,
 		Start	=> Start_unlift,
-		LongRes	=> LongRes,
-		ShortRes=> ShortRes
+		Done => Done_u,
+		LongRes	=> LongRes
+		--ShortRes=> ShortRes
 	);
 	
 	liftand: for i in 0 to PolyDegree generate
@@ -110,6 +111,8 @@ begin
 					if done_mul = '1' then
 						counter <= "0010";
 					end if;
+				elsif counter = "0010" then
+					
 				else
 					
 				end if;
@@ -121,7 +124,9 @@ begin
 	
 	mul_ctr: process(clk)
 	begin
-		if clk'event and clk = '1' then
+		if rst = '1' then 
+			Start_mul <= '0';
+		elsif clk'event and clk = '1' then
 			if Start = '1' then
 				if counter = 1 then --and done_mul /= '1' then
 					Start_mul <= '1';
@@ -147,6 +152,6 @@ begin
 		end if;
 	end process;
 	
-	Done <= '0';
+	Done <= done_u and start;
 
 end a1;

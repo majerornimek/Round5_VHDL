@@ -8,13 +8,13 @@ use work.Round5_constants.all;
 
 entity Mul_Poly_NTRU is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		PolyB	: in Trinomial(PolyDegree downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0)
 		--ShortRes: out ShortPoly(PolyDegree downto 0)
 	);
 end entity;
@@ -23,26 +23,26 @@ architecture a1 of Mul_Poly_NTRU is
 
 component Mul_Poly_NTRU_tri_unit is 
 	port (
-		A		: in std_logic_vector(LongModLen-2 downto 0);
+		A		: in std_logic_vector(q_bits-1 downto 0);
 		B		: in std_logic_vector(1 downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
-		LongRes	: out std_logic_vector(LongModLen-2 downto 0)
+		LongRes	: out std_logic_vector(q_bits-1 downto 0)
 	);
 end component;
 
-signal shift_A : NTRUPoly(PolyDegree downto 0);		-- shift registers to store polynomials
+signal shift_A : q_bitsPoly(PolyDegree downto 0);		-- shift registers to store polynomials
 signal shift_B : Trinomial(PolyDegree downto 0);		-- shift registers to store polynomials
-signal result_poly		: NTRUPoly(PolyDegree downto 0);
+signal result_poly		: q_bitsPoly(PolyDegree downto 0);
 signal Shift_counter	: std_logic_vector(PolyDegreeLog2-1 downto 0);
-signal LongResTmp   : NTRUPoly(PolyDegree downto 0); 
+signal LongResTmp   : q_bitsPoly(PolyDegree downto 0); 
 signal started	: std_logic; 									--indicate if multiplication started
 signal Rst_mul 	: std_logic;
 
-signal LongResTmp2 : NTRUPoly(PolyDegree downto 0);
-signal ShortResTmp2 : ShortPoly(PolyDegree downto 0);
-signal Start_mul	: std_logic;
+signal LongResTmp2 : q_bitsPoly(PolyDegree downto 0);
+signal ShortResTmp2 : p_bitsPoly(PolyDegree downto 0);
+signal Start_mul, Start_mul1	: std_logic;
 
 begin
 	
@@ -78,6 +78,7 @@ begin
 	if Rst = '1' then
 		Shift_counter <= (others => '0');
 		Done <= '0';
+		Start_mul <= '0';
 	elsif clk'event and clk = '1' then
 		if Started = '1' then
 			if unsigned(Shift_counter) /= PolyDegree+1 then
@@ -145,6 +146,6 @@ begin
 	end if;
 end process;
 
-	
+--start_mul <= start_mul1 and start;	
 	
 end a1;
