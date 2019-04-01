@@ -1,7 +1,7 @@
 Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
-| Date         : Sat Mar 23 12:35:35 2019
+| Date         : Fri Mar 29 00:46:28 2019
 | Host         : LAPTOP-JKD6OG4N running 64-bit major release  (build 9200)
 | Command      : report_utilization -file Round5_enc_arith_utilization_synth.rpt -pb Round5_enc_arith_utilization_synth.pb
 | Design       : Round5_enc_arith
@@ -30,11 +30,11 @@ Table of Contents
 +-------------------------+-------+-------+-----------+-------+
 |        Site Type        |  Used | Fixed | Available | Util% |
 +-------------------------+-------+-------+-----------+-------+
-| Slice LUTs*             | 32452 |     0 |    303600 | 10.69 |
-|   LUT as Logic          | 32452 |     0 |    303600 | 10.69 |
+| Slice LUTs*             | 42306 |     0 |    303600 | 13.93 |
+|   LUT as Logic          | 42306 |     0 |    303600 | 13.93 |
 |   LUT as Memory         |     0 |     0 |    130800 |  0.00 |
-| Slice Registers         | 53978 |     0 |    607200 |  8.89 |
-|   Register as Flip Flop | 53978 |     0 |    607200 |  8.89 |
+| Slice Registers         | 55065 |     0 |    607200 |  9.07 |
+|   Register as Flip Flop | 55065 |     0 |    607200 |  9.07 |
 |   Register as Latch     |     0 |     0 |    607200 |  0.00 |
 | F7 Muxes                |     0 |     0 |    151800 |  0.00 |
 | F8 Muxes                |     0 |     0 |     75900 |  0.00 |
@@ -55,9 +55,9 @@ Table of Contents
 | 0     |            _ |       Reset |            - |
 | 0     |          Yes |           - |            - |
 | 1     |          Yes |           - |          Set |
-| 6906  |          Yes |           - |        Reset |
+| 6842  |          Yes |           - |        Reset |
 | 0     |          Yes |         Set |            - |
-| 47071 |          Yes |       Reset |            - |
+| 48222 |          Yes |       Reset |            - |
 +-------+--------------+-------------+--------------+
 
 
@@ -90,7 +90,7 @@ Table of Contents
 +-----------------------------+-------+-------+-----------+---------+
 |          Site Type          |  Used | Fixed | Available |  Util%  |
 +-----------------------------+-------+-------+-----------+---------+
-| Bonded IOB                  | 18565 |     0 |       600 | 3094.17 |
+| Bonded IOB                  | 19206 |     0 |       600 | 3201.00 |
 | Bonded IPADs                |     0 |     0 |        62 |    0.00 |
 | Bonded OPADs                |     0 |     0 |        40 |    0.00 |
 | PHY_CONTROL                 |     0 |     0 |        14 |    0.00 |
@@ -151,18 +151,17 @@ Table of Contents
 +----------+-------+---------------------+
 | Ref Name |  Used | Functional Category |
 +----------+-------+---------------------+
-| FDRE     | 47071 |        Flop & Latch |
-| LUT3     | 14382 |                 LUT |
-| IBUF     | 13109 |                  IO |
-| LUT2     |  8130 |                 LUT |
-| LUT5     |  7554 |                 LUT |
-| FDCE     |  6906 |        Flop & Latch |
-| LUT4     |  6255 |                 LUT |
-| OBUF     |  5452 |                  IO |
-| LUT6     |  4226 |                 LUT |
-| CARRY4   |  3711 |          CarryLogic |
-| OBUFT    |     4 |                  IO |
-| LUT1     |     3 |                 LUT |
+| FDRE     | 48222 |        Flop & Latch |
+| IBUF     | 13622 |                  IO |
+| LUT5     | 13141 |                 LUT |
+| LUT3     | 11492 |                 LUT |
+| LUT6     |  8505 |                 LUT |
+| LUT2     |  8314 |                 LUT |
+| FDCE     |  6842 |        Flop & Latch |
+| LUT4     |  6480 |                 LUT |
+| CARRY4   |  5821 |          CarryLogic |
+| OBUF     |  5584 |                  IO |
+| LUT1     |   749 |                 LUT |
 | FDPE     |     1 |        Flop & Latch |
 | BUFG     |     1 |               Clock |
 +----------+-------+---------------------+
@@ -171,11 +170,9 @@ Table of Contents
 8. Black Boxes
 --------------
 
-+---------------+------+
-|    Ref Name   | Used |
-+---------------+------+
-| round_poly_ex |    1 |
-+---------------+------+
++----------+------+
+| Ref Name | Used |
++----------+------+
 
 
 9. Instantiated Netlists

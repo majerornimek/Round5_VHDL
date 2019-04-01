@@ -13,16 +13,17 @@ entity Round5_enc_arith is
 		PolyB			: in p_bitsPoly(PolyDegree downto 0);	--W enc: polyB,   W dec: polyU
 		PolyR			: in Trinomial(PolyDegree-1 downto 0); --W enc: poly R   W dec: polyS
 		Message		    : in std_logic_vector(MessageLen-1 downto 0);
-		ctV             : in t_bitsPoly(PolyDegree-1 downto 0);
+		ctV             : in t_bitsPoly(MessageLen-1  downto 0);
         
         
 		clk			: in std_logic;
 		Start			: in std_logic;
 		Reset			: in std_logic;
 		Operation	: in std_logic;  -- 1 enc, 0 dec
-		
+		Done        : out std_logic;
+        
 		FirstPart	: out p_bitsPoly(PolyDegree-1 downto 0);
-		SecondPart	: out t_bitsPoly(PolyDegree-1 downto 0);
+		SecondPart	: out t_bitsPoly(MessageLen-1  downto 0);
         
 		Dec_Msg		: out std_logic_vector(MessageLen-1 downto 0)
 		
@@ -46,40 +47,51 @@ component Mul_Poly is
 end component;
 
 component round_poly_ex is
-	generic(
-		InputWidth 	: integer := a_bits_enc1;
-		OutputWidth	: integer := b_bits_enc1
-	);
 	port(
-		PolyA		: in q_bitsPoly(PolyDegree-1 downto 0);
-		InputConst	: in std_logic_vector(6 downto 0);
+		PolyA		: in q_bitsPoly(PolyDegree downto 0);
+		InputConst	: in std_logic_vector(7 downto 0);
 		clk 		: in std_logic;
-		PolyEnc1	: out P_bitsPoly(PolyDegree-1 downto 0);
-		PolyEnc2	: out t_bitsPoly(PolyDegree-1 downto 0);
-		PolyDec1	: out std_logic_vector(PolyDegree-1 downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
+		PolyEnc1	: out P_bitsPoly(PolyDegree downto 0);
+		PolyEnc2	: out t_bitsPoly(PolyDegree downto 0);
+		PolyDec1	: out std_logic_vector(PolyDegree downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
 	);
 	
 end component;
 
-signal Rounded_e1   : P_bitsPoly(PolyDegree-1 downto 0);
-signal Rounded_e2	: t_bitsPoly(PolyDegree-1 downto 0);
-signal Rounded_d1	: std_logic_vector(PolyDegree-1 downto 0);--t_bitsPoly(PolyDegree-1 downto 0)
+component add_sub_poly is
+	port(
+		PolyA		: in p_bitsPoly(MessageLen-1 downto 0);
+		PolyB		: in q_bitsPoly(MessageLen-1 downto 0);
+		
+		Operation   : in std_logic;	-- 1 add, 0 sub
+		clk		    : in std_logic;
+		
+		PolyC		: out p_bitsPoly(MessageLen-1 downto 0)
+	);
+end component;
+
+signal Rounded_e1   : P_bitsPoly(PolyDegree downto 0);
+signal Rounded_e2	: t_bitsPoly(PolyDegree downto 0);
+signal Rounded_d1	: std_logic_vector(PolyDegree downto 0);--t_bitsPoly(PolyDegree-1 downto 0)
 signal Poly_2_round 	:  q_bitsPoly(PolyDegree downto 0);
 signal polyA_2_mul 	: q_bitsPoly(PolyDegree downto 0);
 signal PolyB_ext 	: q_bitsPoly(PolyDegree downto 0);
 signal PolyR_ext	: Trinomial(PolyDegree downto 0);
 signal mul_start, mul_type, mul_rst, mul_done : std_logic;
 signal mul_res 		: q_bitsPoly(PolyDegree downto 0);
-signal mul_res_short	: q_bitsPoly(PolyDegree-1 downto 0);
-signal unpacked_v		: p_bitsPoly(PolyDegree-1 downto 0);
-signal arithm_result : p_bitsPoly(PolyDegree-1 downto 0);
-signal rounding_const : std_logic_vector(6 downto 0);
+signal mul_res_short	: q_bitsPoly(PolyDegree downto 0);
+signal unpacked_v		: p_bitsPoly(MessageLen-1 downto 0);
+signal arithm_result : p_bitsPoly(MessageLen-1 downto 0);
+signal arithm_result_q : q_bitsPoly(PolyDegree downto 0);
+
+signal rounding_const : std_logic_vector(7 downto 0);
 type FSM_type is (idle, init, first_mul_enc, first_round_enc, second_mul_enc, second_round_enc, after_encryption, mult_dec, sub_dec, round_dec, after_decryption);
 signal FSM : FSM_type := idle;
 
-signal AddedMessage	: t_bitsPoly(PolyDegree-1 downto 0);
-
-signal p_bits_poly_memory_register_1 : P_bitsPoly(PolyDegree-1 downto 0);
+signal AddedMessage	: t_bitsPoly(MessageLen-1 downto 0);
+signal Reversed_Messsage    : std_logic_vector(0 to MessageLen-1);
+signal Ordered_Message      : std_logic_vector(0 to MessageLen-1);
+signal p_bits_poly_memory_register_1 : P_bitsPoly(PolyDegree downto 0);
 
 
 begin
@@ -99,6 +111,7 @@ begin
 					else
 						FSM <= mult_dec;
 					end if;
+                    Done <= '0';
 				end if;
 			---- ENCRYPTION ------
 			when first_mul_enc =>
@@ -121,6 +134,7 @@ begin
 				FSM <= after_encryption;
 			
 			when after_encryption =>
+                Done <= '1';
 				-- TO DO
 				
 				
@@ -137,8 +151,8 @@ begin
 				FSM <= after_decryption;
 			
 			when after_decryption =>
-				-- TO DO
-				
+				Dec_Msg <= Rounded_d1(PolyDegree downto PolyDegree-MessageLen+1);
+				Done <= '1';
 			when others =>
 				FSM <= idle;
 		
@@ -180,9 +194,9 @@ begin
 		
 		elsif FSM = mult_dec then 
 		
-			polyA_2_mul <= PolyB_ext;
-			mul_start <= '0';
-			mul_rst <= '1';
+			polyA_2_mul(PolyDegree  downto 0) <= PolyB_ext;
+			mul_start <= '1';
+			mul_rst <= '0';
 		
 		
 		else 
@@ -199,16 +213,16 @@ in_round: process(clk)
 begin
 	if clk'event and clk = '1' then
 		if FSM = first_round_enc then 
-			Poly_2_round(PolyDegree downto 1) <= mul_res(PolyDegree downto 1);
-			Poly_2_round(0) <= (others => '0');
+			Poly_2_round(PolyDegree downto 0) <= mul_res;
+			--Poly_2_round(0) <= (others => '0');
 			rounding_const <= r_const_enc1;
 		elsif  FSM = second_round_enc then	
-			Poly_2_round(PolyDegree downto 1) <= mul_res_short;
-			Poly_2_round(0) <= (others => '0');
+			Poly_2_round(PolyDegree downto 0) <= mul_res_short;
+			--Poly_2_round(0) <= (others => '0');
 			rounding_const <= r_const_enc2;
 		elsif  FSM = round_dec then	
-			Poly_2_round(PolyDegree downto 1) <= mul_res_short;--arithm_result;
-			Poly_2_round(0) <= (others => '0');
+			Poly_2_round(PolyDegree downto 0) <= arithm_result_q;
+			--Poly_2_round(0) <= (others => '0');
 			rounding_const <= r_const_dec1;
 		end if;
 	
@@ -217,35 +231,62 @@ end process;
 
 ----------------  SHORTEN MUL RESULT
 
-	ff: for i in PolyDegree-1 downto 0 generate
+	ff: for i in PolyDegree downto 0 generate
 	
-		mul_res_short(i)(q_bits-1 downto ShortModLen) <= (others => '0');
-		mul_res_short(i)(p_bits downto 0) <= mul_res(i+1)(p_bits downto 0);
+		mul_res_short(i)(q_bits-1 downto p_bits+1) <= (others => '0');
+		mul_res_short(i)(p_bits downto 0) <= mul_res(i)(p_bits downto 0);  --i+1
 		
 	end generate;
 	
 ----------------	EXTEND POLY C
 
 	f2: for i in PolyDegree downto 0 generate
-		PolyB_ext(i)(q_bits-1 downto p_bits) <= "000";
+		PolyB_ext(i)(q_bits-1 downto p_bits) <= (others => '0');
 		PolyB_ext(i)(p_bits-1 downto 0) <= PolyB(i);
 
 	end generate;
 	
 ----------------	MESSAGE ADDITION	
-	AdMsg: for i in PolyDegree-1 downto 0 generate
+    reve: for i in 0 to 127 generate
+        Reversed_Messsage(i) <= Message(MessageLen-1 - i);
+    end generate reve;
+    
+
+    
+    rv: for i in 15 downto 0 generate
+        Ordered_Message((15-i)*8 to (16 - i)*8-1 ) <= Reversed_Messsage(i*8 to (i+1)*8-1);
+        
+    end generate rv;
+    
+
+	AdMsg: for i in PolyDegree downto 0 generate
 		
-		Xored: if i > PolyDegree-1-MessageLen generate
-			AddedMessage(i-1)(t_bits-2 downto 0) <= rounded_e2(i-1)(t_bits-2 downto 0);
-			AddedMessage(i-1)(t_bits-1) <= rounded_e2(i-1)(t_bits-1) xor Message(127 - (PolyDegree-1-i));
+		Xored: if i >= PolyDegree-(MessageLen-1) generate
+			AddedMessage(MessageLen-1 - (PolyDegree-i))(t_bits-2 downto 0) <= rounded_e2(i)(t_bits-2 downto 0);
+			AddedMessage(MessageLen-1 - (PolyDegree-i))(t_bits-1) <= rounded_e2(i)(t_bits-1) xor Ordered_Message(MessageLen-1 - (PolyDegree-i));
 		end generate Xored;
 		
-		rest: if i<=  PolyDegree-1-MessageLen generate
-			AddedMessage(i) <= rounded_e2(i);
-		end generate rest;
-		
 	end generate;
+    
+--------------- POLY V DECOMPRESSION
 
+    decompres: for i in MessageLen-1 downto 0 generate
+        unpacked_v(i)(p_bits-1 downto p_bits-t_bits) <= ctV(i);
+        unpacked_v(i)(p_bits-1-t_bits downto 0) <= (others => '0');
+    
+    end generate decompres;
+
+-------------- SUBSTRACTION RESULT EXTENSION TO Q_bits
+
+    ext_decompres: for i in MessageLen-1 downto 0 generate
+        arithm_result_q(PolyDegree-MessageLen+i+1)(p_bits-1 downto 0) <= arithm_result(i);
+        arithm_result_q(PolyDegree-MessageLen+i+1)(q_bits-1 downto p_bits) <= (others => '0');
+    end generate ext_decompres;
+    
+    ext_decompres2: for i in PolyDegree-MessageLen downto 0 generate
+        arithm_result_q(i) <= (others => '0');
+    end generate ext_decompres2;
+    
 ---------------	POLY R EXTENSION
 	
 	PolyR_ext(PolyDegree downto 1) <=  PolyR;
@@ -253,14 +294,15 @@ end process;
 
 ------------------------	PUSH OUT RESULTS
 	
-	FirstPart <= p_bits_poly_memory_register_1;
-	--SecondPart <= AddedMessage(PolyDegree-1 downto PolyDegree- MessageLen);
-	SecondPart <= AddedMessage(PolyDegree-1 downto 0);
-	
+	FirstPart <= p_bits_poly_memory_register_1(PolyDegree downto 1);
+	pushsec: for i in 0 to MessageLen/2 -1 generate
+        SecondPart(2*i) <=   AddedMessage((2*i+1));
+        SecondPart(2*i+1) <= AddedMessage((2*i));
+    end generate pushsec;
 ------------------------	MODULES INSTANTION	
 
 	rp: round_poly_ex port map(
-		PolyA		=> Poly_2_round(PolyDegree downto 1),
+		PolyA		=> Poly_2_round(PolyDegree downto 0),
 		InputConst	=> rounding_const,
 		clk 		=> clk,
 		PolyEnc1	=> Rounded_e1,   -- prawdopodobnie out, U
@@ -279,12 +321,12 @@ end process;
 		LongRes	=> mul_res --(PolyDegree downto 1)
 	);
 	
---	ar: work.add_sub_poly port map(
---		PolyA => upacked_v,
---		PolyB => mul_res_short,
---		Operation => '0',
---		clk 	=> clk,
---		PolyC => arithm_result
---	);
+	ar: add_sub_poly port map(
+		PolyA => unpacked_v,
+		PolyB => mul_res_short(PolyDegree downto PolyDegree-MessageLen+1),
+		Operation => '0',
+		clk 	=> clk,
+		PolyC => arithm_result
+	);
 
 end a1;

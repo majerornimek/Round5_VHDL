@@ -35,8 +35,12 @@ read_vhdl -library xil_defaultlib {
   C:/Users/ma/Documents/GitHub/Round5_VHDL/Mul_Poly_NTRU.vhd
   C:/Users/ma/Documents/GitHub/Round5_VHDL/Mul_Poly_NTRU_tri_unit.vhd
   C:/Users/ma/Documents/GitHub/Round5_VHDL/Unlift_Poly.vhd
+  C:/Users/ma/Documents/GitHub/Round5_VHDL/add_sub_poly.vhd
+  C:/Users/ma/Documents/GitHub/Round5_VHDL/add_sub_unit.vhd
+  C:/Users/ma/Documents/GitHub/Round5_VHDL/round_element_ex.vhd
   C:/Users/ma/Documents/GitHub/Round5_VHDL/Round5_enc_arith.vhd
 }
+read_vhdl -vhdl2008 -library xil_defaultlib C:/Users/ma/Documents/GitHub/Round5_VHDL/round_poly_ex.vhd
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
 # design are intentionally left as such for best results. Dcp files will be

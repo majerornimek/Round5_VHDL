@@ -677,11 +677,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="245.07569"
-     inkscape:cy="963.42734"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="178.61604"
+     inkscape:cy="858.10767"
      inkscape:document-units="mm"
-     inkscape:current-layer="g5872"
+     inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
@@ -700,7 +700,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -896,7 +896,7 @@
            y="11.133069"
            x="29.965322"
            id="tspan5709"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-3"
          y="20.292597"
@@ -907,7 +907,7 @@
            y="20.292597"
            x="29.77961"
            id="tspan5709-8"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-1"
          y="29.684616"
@@ -918,7 +918,7 @@
            y="29.684616"
            x="29.817669"
            id="tspan5709-7"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-2"
          y="40.089573"
@@ -929,7 +929,7 @@
            y="40.089573"
            x="29.592522"
            id="tspan5709-2"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-6"
          y="36.755001"
@@ -940,7 +940,7 @@
            y="36.755001"
            x="34.461857"
            id="tspan5709-4"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-60"
          y="11.13306"
@@ -1005,7 +1005,7 @@
            y="5.4941268"
            x="24.491755"
            id="tspan5709-86"
-           sodipodi:role="line">11k</tspan></text>
+           sodipodi:role="line">qk</tspan></text>
       <text
          id="text5711-60-3"
          y="-1.0212358"
@@ -1093,7 +1093,7 @@
            y="59.934082"
            x="63.116787"
            id="tspan5709-86-3"
-           sodipodi:role="line">11n</tspan></text>
+           sodipodi:role="line">qn</tspan></text>
       <path
          inkscape:connector-curvature="0"
          id="path5662-6-36"
@@ -1345,7 +1345,7 @@
            y="5.841403"
            x="29.965321"
            id="tspan5709-9"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-3-5"
          y="15.000931"
@@ -1356,7 +1356,7 @@
            y="15.000931"
            x="29.779608"
            id="tspan5709-8-2"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-1-9"
          y="24.39295"
@@ -1367,7 +1367,7 @@
            y="24.39295"
            x="29.817667"
            id="tspan5709-7-1"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-2-6"
          y="34.797909"
@@ -1378,7 +1378,7 @@
            y="34.797909"
            x="29.59252"
            id="tspan5709-2-6"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-6-4"
          y="31.463335"
@@ -1389,7 +1389,7 @@
            y="31.463335"
            x="34.461857"
            id="tspan5709-4-8"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-60-5"
          y="5.8413939"
@@ -1601,7 +1601,7 @@
            y="5.841403"
            x="29.965321"
            id="tspan5709-78"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-3-4"
          y="15.000931"
@@ -1612,7 +1612,7 @@
            y="15.000931"
            x="29.779608"
            id="tspan5709-8-5"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-1-1"
          y="24.39295"
@@ -1623,7 +1623,7 @@
            y="24.39295"
            x="29.817667"
            id="tspan5709-7-0"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-2-5"
          y="34.797909"
@@ -1634,7 +1634,7 @@
            y="34.797909"
            x="29.59252"
            id="tspan5709-2-5"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-6-43"
          y="31.463335"
@@ -1645,7 +1645,7 @@
            y="31.463335"
            x="34.461857"
            id="tspan5709-4-6"
-           sodipodi:role="line">11</tspan></text>
+           sodipodi:role="line">q</tspan></text>
       <text
          id="text5711-60-9"
          y="5.8413939"

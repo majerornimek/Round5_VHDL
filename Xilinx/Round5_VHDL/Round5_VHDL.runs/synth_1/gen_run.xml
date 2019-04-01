@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7vx485tffg1157-1" LaunchTime="1553365714">
+<GenRun Id="synth_1" LaunchPart="xc7vx485tffg1157-1" LaunchTime="1553841117">
   <File Type="PA-TCL" Name="Round5_enc_arith.tcl"/>
-  <File Type="RDS-PROPCONSTRS" Name="Round5_enc_arith_drc_synth.rpt"/>
   <File Type="REPORTS-TCL" Name="Round5_enc_arith_reports.tcl"/>
   <File Type="RDS-RDS" Name="Round5_enc_arith.vds"/>
   <File Type="RDS-UTIL" Name="Round5_enc_arith_utilization_synth.rpt"/>
   <File Type="RDS-UTIL-PB" Name="Round5_enc_arith_utilization_synth.pb"/>
   <File Type="RDS-DCP" Name="Round5_enc_arith.dcp"/>
-  <File Type="VDS-TIMINGSUMMARY" Name="Round5_enc_arith_timing_summary_synth.rpt"/>
-  <File Type="VDS-TIMING-PB" Name="Round5_enc_arith_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PPRDIR/../../Round5_constants.vhd">
@@ -47,7 +44,13 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PPRDIR/../../Round5_enc_arith.vhd">
+    <File Path="$PPRDIR/../../add_sub_poly.vhd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../../add_sub_unit.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
@@ -55,28 +58,18 @@
     </File>
     <File Path="$PPRDIR/../../round_element_ex.vhd">
       <FileInfo>
-        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
     <File Path="$PPRDIR/../../round_poly_ex.vhd">
       <FileInfo SFType="VHDL2008">
-        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PPRDIR/../../add_sub_unit.vhd">
+    <File Path="$PPRDIR/../../Round5_enc_arith.vhd">
       <FileInfo>
-        <Attr Name="AutoDisabled" Val="1"/>
-        <Attr Name="UsedIn" Val="synthesis"/>
-        <Attr Name="UsedIn" Val="simulation"/>
-      </FileInfo>
-    </File>
-    <File Path="$PPRDIR/../../add_sub_poly.vhd">
-      <FileInfo>
-        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
@@ -113,9 +106,7 @@
     </Config>
   </FileSet>
   <Strategy Version="1" Minor="2">
-    <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018">
-      <Desc>Vivado Synthesis Defaults</Desc>
-    </StratHandle>
+    <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018"/>
     <Step Id="synth_design"/>
   </Strategy>
 </GenRun>

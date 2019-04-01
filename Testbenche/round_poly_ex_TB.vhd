@@ -13,18 +13,13 @@ end entity;
 architecture a1 of round_poly_ex_tb is
 
 component round_poly_ex is
-	generic(
-		InputWidth 	: integer := a_bits_enc1;
-		OutputWidth	: integer := b_bits_enc1
-	);
 	port(
-		PolyA		: in bus_array(PolyDegree-1 downto 0)(InputWidth-1 downto 0);
-		InputMask	: in std_logic_vector(InputWidth-1 downto 0);
-		InputConst	: in std_logic_vector(3 downto 0);
+		PolyA		: in q_bitsPoly(PolyDegree downto 0);
+		InputConst	: in std_logic_vector(6 downto 0);
 		clk 		: in std_logic;
-		PolyEnc1	: out bus_array(PolyDegree-1 downto 0)(b_bits_enc1-1 downto 0);
-		PolyEnc2	: out bus_array(PolyDegree-1 downto 0)(b_bits_enc2-1 downto 0);
-		PolyDec1	: out bus_array(PolyDegree-1 downto 0)(b_bits_dec1-1 downto 0)
+		PolyEnc1	: out P_bitsPoly(PolyDegree downto 0);
+		PolyEnc2	: out t_bitsPoly(PolyDegree downto 0);
+		PolyDec1	: out std_logic_vector(PolyDegree downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
 	);
 	
 end component;
@@ -32,11 +27,11 @@ end component;
 signal clk : std_logic;
 
 constant CLK_PERIOD : time := 10 ps;
-signal PolyA_tmp : bus_array(PolyDegree-1 downto 0)(a_bits_enc1-1 downto 0);
+signal PolyA_tmp : q_bitsPoly(PolyDegree downto 0);
 signal start_tmp : std_logic;
-signal P1 : bus_array(PolyDegree-1 downto 0)(b_bits_enc1-1 downto 0);
-signal P2 : bus_array(PolyDegree-1 downto 0)(b_bits_enc2-1 downto 0);
-signal P3 : bus_array(PolyDegree-1 downto 0)(b_bits_dec1-1 downto 0);
+signal P1 : P_bitsPoly(PolyDegree downto 0);
+signal P2 : t_bitsPoly(PolyDegree downto 0);
+signal P3 : std_logic_vector(PolyDegree downto 0);
 
 
 type input_array is array(PolyDegree-1 downto 0) of integer;

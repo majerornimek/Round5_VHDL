@@ -88,8 +88,8 @@ begin
 	);
 	
 	liftand: for i in 0 to PolyDegree generate
-		short_lifted_and(i) <= Long_lifted(i) and ShortPolyMask;
-		short_mul_and(i)	<= long_mul(i) and ShortPolyMask;
+		short_lifted_and(i) <= Long_lifted(i) and p_PolyMask;
+		short_mul_and(i)	<= long_mul(i) and p_PolyMask;
 	end generate liftand; 
 	
 	with OpType select PolyA_to_mul <=

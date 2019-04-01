@@ -9,17 +9,13 @@ use work.Round5_constants.all;
 
 
 entity round_poly_ex is
-	generic(
-		InputWidth 	: integer := a_bits_enc1;
-		OutputWidth	: integer := b_bits_enc1
-	);
 	port(
-		PolyA		: in q_bitsPoly(PolyDegree-1 downto 0);
-		InputConst	: in std_logic_vector(6 downto 0);
+		PolyA		: in q_bitsPoly(PolyDegree downto 0);
+		InputConst	: in std_logic_vector(7 downto 0);
 		clk 		: in std_logic;
-		PolyEnc1	: out P_bitsPoly(PolyDegree-1 downto 0);
-		PolyEnc2	: out t_bitsPoly(PolyDegree-1 downto 0);
-		PolyDec1	: out std_logic_vector(PolyDegree-1 downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
+		PolyEnc1	: out P_bitsPoly(PolyDegree downto 0);
+		PolyEnc2	: out t_bitsPoly(PolyDegree downto 0);
+		PolyDec1	: out std_logic_vector(PolyDegree downto 0)--t_bitsPoly(PolyDegree-1 downto 0)
 	);
 	
 end entity;
@@ -27,25 +23,20 @@ end entity;
 
 architecture a1 of round_poly_ex is
 component round_element_ex is	
-	generic(
-		InputWidth 	: integer := 11
-	);
+
 	port (
-		InputElement	: in std_logic_vector(InputWidth-1 downto 0);
-		Const		    : in std_logic_vector(6 downto 0);
+		InputElement	: in std_logic_vector(q_bits-1 downto 0);
+		Const		    : in std_logic_vector(7 downto 0);
 		clk				: in std_logic;
 		OutElement_enc1	: out std_logic_vector(p_bits-1 downto 0);
-		OutElement_enc2	: out std_logic_vector(b_bits_enc2-1 downto 0);
+		OutElement_enc2	: out std_logic_vector(t_bits-1 downto 0);
 		OutElement_dec1	: out std_logic--_vector(b_bits_dec1-1 downto 0)
 	);
 end component;
 
 begin
-	ro: for i in 0 to PolyDegree-1 generate
+	ro: for i in 0 to PolyDegree generate
 		re: round_element_ex
-			generic map(
-				InputWidth 	=> InputWidth
-			)
 			port map(
 				InputElement => PolyA(i),
 				Const => InputConst,

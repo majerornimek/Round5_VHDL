@@ -12,19 +12,19 @@ end entity;
 architecture a1 of Mul_Poly_TB is 
 component Mul_Poly is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		PolyB	: in Trinomial(PolyDegree downto 0); 
 		clk		: in std_logic;
 		Start	: in std_logic;
 		Rst		: in std_logic;
 		OpType	: in std_logic;
 		Done	: out std_logic;
-		LongRes	: out NTRUPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0)
 	);
 end component;
-signal inA, outC : NTRUPoly(PolyDegree downto 0);
+signal inA, outC : q_bitsPoly(PolyDegree downto 0);
 signal inB : Trinomial(PolyDegree downto  0); 
-signal outS : ShortPoly(PolyDegree downto  0);
+signal outS : p_bitsPoly(PolyDegree downto  0);
 signal clk, start_tmp, rst_tmp, op_tmp, done_tmp : std_logic;
 constant CLK_PERIOD : time := 10 ps;
 type input_array is array(PolyDegree downto 0) of integer;
@@ -59,7 +59,7 @@ process
 		variable res: input_array;
 	begin
 		GG: for i in PolyDegree downto 0 loop
-			inA(i) <= std_logic_vector(to_signed(PolyA(i), LongModLen-1));
+			inA(i) <= std_logic_vector(to_signed(PolyA(i), q_bits));
 			inB(i) <= std_logic_vector(to_signed(PolyB(i), 2));
 		end loop GG; 
 		

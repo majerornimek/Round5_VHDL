@@ -9,27 +9,27 @@ use work.Round5_constants.all;
 
 entity add_sub_unit is
 	port(
-		A		: in std_logic_vector(ShortModLen-2 downto 0);
-		B		: in std_logic_vector(ShortModLen-2 downto 0);
+		A		: in std_logic_vector(p_bits-1 downto 0);
+		B		: in std_logic_vector(p_bits-1 downto 0);
 		
 		Operation: in std_logic;	-- 1 add, 0 sub
 		clk		: in std_logic;
 		
-		C		: out std_logic_vector(ShortModLen-2 downto 0)
+		C		: out std_logic_vector(p_bits-1 downto 0)
 	);
 end entity;
 
 
 architecture a1 of add_sub_unit is 
 
-signal tmpB, tmpC : std_logic_vector(ShortModLen-2 downto 0);
+signal tmpB, tmpC : std_logic_vector(p_bits-1 downto 0);
 begin
 
 with Operation select tmpB <=
 	B when '1',
 	not B + '1' when others;
 
-C <= tmpC(ShortModLen-2 downto 0);
+C <= tmpC(p_bits-1 downto 0);
 
 process(clk)
 begin

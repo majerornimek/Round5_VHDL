@@ -13,19 +13,19 @@ end entity;
 architecture a1 of Unlift_poly_TB is
 component Unlift_Poly is 
 	port (
-		PolyA	: in NTRUPoly(PolyDegree downto 0);
+		PolyA	: in q_bitsPoly(PolyDegree downto 0);
 		clk 	: in std_logic;
 		Start	: in std_logic; 
-		LongRes	: out NTRUPoly(PolyDegree downto 0);
-		ShortRes: out ShortPoly(PolyDegree downto 0)
+		LongRes	: out q_bitsPoly(PolyDegree downto 0);
+		ShortRes: out p_bitsPoly(PolyDegree downto 0)
 	);
 end component;
 
 signal clk : std_logic;
 
 constant CLK_PERIOD : time := 10 ps;
-signal PolyA_tmp, long_Res : NTRUPoly(PolyDegree downto 0);
-signal short_Res : ShortPoly(PolyDegree downto 0);
+signal PolyA_tmp, long_Res : q_bitsPoly(PolyDegree downto 0);
+signal short_Res : p_bitsPoly(PolyDegree downto 0);
 signal start_tmp : std_logic;
 type input_array is array(PolyDegree downto 0) of integer;
 begin 
@@ -53,7 +53,7 @@ process
 		
 	begin
 		GG: for i in PolyDegree downto 0 loop
-			PolyA_tmp(i) <= std_logic_vector(to_unsigned(inV1(i), LongModLen-1));
+			PolyA_tmp(i) <= std_logic_vector(to_unsigned(inV1(i), q_bits));
 		end loop GG;
 		
 		wait for CLK_PERIOD;
