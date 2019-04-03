@@ -434,4 +434,14 @@ end process;
 --end process;
 
 
+for i in range(
+
+select FIFO_dout with 
+
+	case pointer is
+		when "00000001" => 
+			FIFO_dout <= FirstPart(AXI_bus_width*(i+1)-1 downto AXI_bus_width*(i))
+		
+
+
 end a1;

@@ -79,18 +79,17 @@ end package;
 
     ----- CONSTANTS FOR AXI WRAPPER ----
 --    constant AXI_data_width : integer := 60; -- number of bits saved in one clock cycle
---    constant PolyA_cycle 	: integer := integer(ceil((PolyDegree*q_bits)/AXI_data_width)); 	-- num of cycles needed for data load
---    constant PolyB_cycle	: integer := integer(ceil((PolyDegree*p_bits)/AXI_data_width));
---    constant PolyR_cycle    : integer := integer(ceil((PolyDegree*2)/AXI_data_width));
---    constant Message_cycle 	: integer := integer(ceil((MessageLen)/AXI_data_width));
---    constant ctV_cycle		: integer := integer(ceil((MessageLen*t_bits)/AXI_data_width));
+--    constant PolyA_cycle 	: integer := 114; 	-- num of cycles needed for data load
+--    constant PolyB_cycle	: integer := 83;
+--    constant PolyR_cycle    : integer := 21;
+--    constant Message_cycle 	: integer := 3;
+--    constant ctV_cycle		: integer := 9;
 --    
---    constant FirstPart_cycle    : integer := integer(ceil((PolyDegree*p_bits)/AXI_data_width));
---    constant SecondPart_cycle	: integer := integer(ceil((MessageLen*t_bits)/AXI_data_width));
---    constant Dec_Msg_cycle 	    : integer := integer(ceil((MessageLen)/AXI_data_width));
+--    constant FirstPart_cycle    : integer := 89;
+--    constant SecondPart_cycle	: integer := 9;
+--    constant Dec_Msg_cycle 	    : integer := 3;
 --    
 --    constant Output_cycle       : integer := FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle;
-
 
 --end package;
 
@@ -124,15 +123,15 @@ end package;
 
     ----- CONSTANTS FOR AXI WRAPPER ----
 --    constant AXI_data_width : integer := 60; -- number of bits saved in one clock cycle
---    constant PolyA_cycle 	: integer := integer(ceil((PolyDegree*q_bits)/AXI_data_width)); 	-- num of cycles needed for data load
---    constant PolyB_cycle	: integer := integer(ceil((PolyDegree*p_bits)/AXI_data_width));
---    constant PolyR_cycle    : integer := integer(ceil((PolyDegree*2)/AXI_data_width));
---    constant Message_cycle 	: integer := integer(ceil((MessageLen)/AXI_data_width));
---    constant ctV_cycle		: integer := integer(ceil((MessageLen*t_bits)/AXI_data_width));
+--    constant PolyA_cycle 	: integer := 114; 	-- num of cycles needed for data load
+--    constant PolyB_cycle	: integer := 83;
+--    constant PolyR_cycle    : integer := 21;
+--    constant Message_cycle 	: integer := 3;
+--    constant ctV_cycle		: integer := 9;
 --    
---    constant FirstPart_cycle    : integer := integer(ceil((PolyDegree*p_bits)/AXI_data_width));
---    constant SecondPart_cycle	: integer := integer(ceil((MessageLen*t_bits)/AXI_data_width));
---    constant Dec_Msg_cycle 	    : integer := integer(ceil((MessageLen)/AXI_data_width));
+--    constant FirstPart_cycle    : integer := 89;
+--    constant SecondPart_cycle	: integer := 9;
+--    constant Dec_Msg_cycle 	    : integer := 3;
 --    
 --    constant Output_cycle       : integer := FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle;
 
