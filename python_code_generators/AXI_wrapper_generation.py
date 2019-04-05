@@ -10,15 +10,14 @@ def to_std_logic_vector(number, length):
     res = bin(number)[2:]
     return '0'*(length- len(res)) + res
 
-def generate_clock_cycle_table(param_table, AXI_width, decrypton_constant):
+def generate_clock_cycle_table(param_table, AXI_width):
     """
     Generate table with numbers of clock cycle needed for read and write for selected ports of arithmetic module
     :param param_table: Table with [degree, q_bits, p_bits, t_bits, MessageLen]
     :param AXI_width: The width of AXI output bus
-    :param decrypton_constant: Additional value added to pointer to mark data for decryption
     :return: Tuple of tables containing numbers of clock cycles for data write and read from FPGA
     """
-    input_clock_cycles = [0,0,0,0,0,0,0,0] # last 3 for decryption input
+    input_clock_cycles = [0,0,0,0,0] # last 3 for decryption input
 
     #PolyA input
     input_clock_cycles[0] = math.ceil((param_table[0]*param_table[1])/AXI_width)
@@ -31,9 +30,6 @@ def generate_clock_cycle_table(param_table, AXI_width, decrypton_constant):
     #ctV_input
     input_clock_cycles[4] = math.ceil((param_table[4]*param_table[3])/AXI_width)
 
-    input_clock_cycles[5] = input_clock_cycles[1]+decrypton_constant
-    input_clock_cycles[6] = input_clock_cycles[2]+decrypton_constant
-    input_clock_cycles[7] = input_clock_cycles[4]+decrypton_constant
     output_clock_cycles = [0,0,0]
 
     # Dec_Msg_output
@@ -61,23 +57,27 @@ def generate_mux_output(data_read_clock_cycles, AXI_width, pointer_width ):
     #AXI_width_constant  = "AXI_size"
     print("==========   OUTPUT  ================")
     print("case output_pointer is\n")
-    for i in range(0,data_read_clock_cycles[2]):
+    out_clk = 0
+    for i in range(0, data_read_clock_cycles[0]):
+        line = ""
+        line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
+        line += output_signal_name + first_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
+        print(line)
+    out_clk += data_read_clock_cycles[0]
+
+    for i in range(out_clk, data_read_clock_cycles[1]):
+        line = ""
+        line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
+        line += output_signal_name + second_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
+        print(line)
+    out_clk += data_read_clock_cycles[1]
+
+    for i in range(out_clk,data_read_clock_cycles[2]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
         line += output_signal_name + dec_msg_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
         print(line)
 
-    for i in range(data_read_clock_cycles[2], data_read_clock_cycles[1]):
-        line = ""
-        line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
-        line += output_signal_name + second_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
-        print(line)
-
-    for i in range(data_read_clock_cycles[1], data_read_clock_cycles[0]):
-        line = ""
-        line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
-        line += output_signal_name + first_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
-        print(line)
     print("end case;")
 
 def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
@@ -129,25 +129,25 @@ def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
 
     print("==========   INPUT DEC  ================")
 
-    sum_of_clock_cycles = input_clock_cycle[5]
+    #sum_of_clock_cycles = input_clock_cycle[5]
     #DECRYPTION
-    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[5]):
+    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[1]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
         line += PolyB_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
             i * int(AXI_width)) + ")" + input_signal_name
         print(line)
-    sum_of_clock_cycles = input_clock_cycle[5]
+    sum_of_clock_cycles = input_clock_cycle[1]
 
-    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[6]):
+    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[2]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
         line += PolyR_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
             i * int(AXI_width)) + ")" + input_signal_name
         print(line)
-    sum_of_clock_cycles += input_clock_cycle[6]
+    sum_of_clock_cycles += input_clock_cycle[2]
 
-    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[7]):
+    for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[4]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
         line += ctV_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     clock_cycles = [10,20,30]
     params = [618, 11, 9, 4, 128]
     AXI_w = 64
-    c_in, c_out = generate_clock_cycle_table(params, AXI_w, 512)
+    c_in, c_out = generate_clock_cycle_table(params, AXI_w)
     print(c_in)
     generate_mux_input(c_in, AXI_w, 10)
     generate_mux_output(c_out, AXI_w, 8)

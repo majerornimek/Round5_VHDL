@@ -81,12 +81,13 @@ signal PolyR_tmp 	: std_logic_vector(PolyR_cycle*AXI_data_width-1 downto 0);
 signal Message_tmp 	: std_logic_vector(Message_cycle*AXI_data_width-1 downto 0);
 signal ctV_tmp		: std_logic_vector(ctV_cycle*AXI_data_width-1 downto 0);
 
---signal FirstPart_tmp	: std_logic_vector(FirstPart_cycle*AXI_data_width-1 downto 0);
---signal SecondPart_tmp	: std_logic_vector(SecondPart_cycle*AXI_data_width-1 downto 0);
+signal FirstPart_tmp	: std_logic_vector(FirstPart_cycle*AXI_data_width-1 downto 0);
+signal SecondPart_tmp	: std_logic_vector(SecondPart_cycle*AXI_data_width-1 downto 0);
 signal Dec_Msg_tmp		: std_logic_vector(MessageLen-1 downto 0);
-signal OutputTmp		: std_logic_vector((FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width-1 downto 0);
-signal Output_Reg       : std_logic_vector((FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width-1 downto 0);
-signal Encrypted_Reg	: std_logic_vector((FirstPart_cycle+SecondPart_cycle)*AXI_data_width-1 downto 0);
+
+--signal OutputTmp		: std_logic_vector((FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width-1 downto 0);
+--signal Output_Reg       : std_logic_vector((FirstPart_cycle+SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width-1 downto 0);
+--signal Encrypted_Reg	: std_logic_vector((FirstPart_cycle+SecondPart_cycle)*AXI_data_width-1 downto 0);
 
 ------	ADDRES POINTERS/COUNTERS
 signal PolyA_count	: std_logic_vector(7 downto 0); -- point the region in PolyA_tmp register to write
@@ -122,8 +123,15 @@ constant SecondPart_addr: std_logic_vector(3 downto 0) := "0010";
 constant Dec_Msg_addr	: std_logic_vector(3 downto 0) := "0011";
 
 signal Round5_status	: std_logic_vector(63 downto AXI_data_width) := (others => '0');
+------------------------
+signal input_counter 		: std_logic_vector(9 downto 0) := (others => '0');
+signal input_counter_max	: std_logic_vector(9 downto 0) := (others => '0');
+signal output_counter		: std_logic_vector(7 downto 0) := (others => '0');
+signal output_counter_max	: std_logic_vector(7 downto 0) := (others => '0');
 
-
+signal COMMAND			: std_logic_vector(7 downto 0) := (others => '0');
+--	COMMAND FORMAT:  start|done|error|dec/end(0/1)|A|B|R|msg/ctv
+signal RECIVED_CMD		: std_logic := '0';
 begin
 
 	arit: Round5_enc_arith port map(
@@ -155,26 +163,80 @@ begin
 PA: for i in 0 to PolyDegree-1 generate
     PolyA_poly(i) <= PolyA_tmp((i+1)*q_bits-1 downto i*q_bits);
     PolyR_poly(i) <= PolyR_tmp((i+1)*2-1 downto i*2);
-
-    --OutputTmp((SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width+(i+1)*p_bits-1 downto (SecondPart_cycle+Dec_Msg_cycle)*AXI_data_width+(i)*p_bits) <= FirstPart_poly(i);
-
 end generate PA;
 
 P1: for i in 0 to PolyDegree generate
     PolyB_poly(i) <= PolyB_tmp((i+1)*p_bits-1 downto i*p_bits);
 end generate P1;
 
-
 MA: for i in 0 to MessageLen-1 generate
     ctV_poly(i) <= ctV_tmp((i+1)*t_bits-1 downto i*t_bits);
-    --OutputTmp((Dec_Msg_cycle)*AXI_data_width+(i+1)*t_bits-1 downto (Dec_Msg_cycle)*AXI_data_width+(i)*t_bits) <= SecondPart_poly(i);
 end generate MA;
-	
+
+--------------------------------- POLYNOMIALS TO RAW DATA
+FP_tmp: for i in 0 to PolyDegree-1 generate
+    FirstPart_tmp((i+1)*q_bits-1 downto i*q_bits) <= FirstPart_poly(i);
+end generate PA;
+
+MA: for i in 0 to MessageLen-1 generate
+    SecondPart_tmp((i+1)*t_bits-1 downto i*t_bits) <= SecondPart_poly(i); 
+end generate MA;
+
 ----------------------------------- ENC/DEC selection and MODULE START SIGNAL OPERATING
+
+		
+		
 process(clk)
 begin
 	if clk'event and clk = '1' then
 		if FIFO_wr_en = '1' then
+			if RECIVED_CMD = '0' then
+				case FIFO_din(61 downto 56) is
+					--ENC
+					when "11000" => 		-- Encryption, PolyA
+						input_counter 		<= std_logic_vector(to_unsigned(PolyA_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(PolyA_cycle_end,10));
+					when "10100" => 		-- Encryption, PolyB`
+						input_counter 		<= std_logic_vector(to_unsigned(PolyB_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(PolyB_cycle_end,10));
+					when "10010" => 		-- Encryption, PolyR
+						input_counter 		<= std_logic_vector(to_unsigned(PolyR_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(PolyR_cycle_end,10));
+					when "10001" => 		-- Encryption, Msg
+						input_counter 		<= std_logic_vector(to_unsigned(Message_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(Message_cycle_end,10));
+					
+					-- DEC
+					when "00100" => 		-- Decryption, PolyB
+						input_counter 		<= std_logic_vector(to_unsigned(PolyB_dec_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(PolyB_dec_cycle_end,10));
+					when "00010" => 		-- Decryption, PolyR
+						input_counter 		<= std_logic_vector(to_unsigned(PolyR_dec_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(PolyR_dec_cycle_end,10));
+					when "00001" => 		-- Decryption, ctV
+						input_counter 		<= std_logic_vector(to_unsigned(ctV_cycle_start,10));
+						input_counter_max 	<= std_logic_vector(to_unsigned(ctV_cycle_end,10));
+					when others => 
+				end case;
+				RECIVED_CMD <= '1';
+			else
+				if input_counter < input_counter_max then
+					input_counter <= input_counter + '1';
+				else
+					RECIVED_CMD <= '0';
+				end if;
+			
+			end if;
+		else
+			RECIVED_CMD <= '0';
+		end if;
+	end if;
+end process;
+		
+		
+		
+		
+		
 			if FIFO_din(63 downto 60) = Message_addr and Message_count = Message_cycle then
 				op_module <= '1';  -- encryption
 				op_selected <= '1';
