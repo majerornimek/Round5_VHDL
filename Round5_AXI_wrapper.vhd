@@ -29,7 +29,7 @@ use ieee.numeric_std.all;
 library work;
 use work.Round5_constants.all;
 
-entity Round5_AXI_wrapper is	
+entity Round5_AXI_wrapper_v2 is	
 	port(
 	clk			: in std_logic;
 	-- FIFO WRITE
@@ -44,7 +44,7 @@ entity Round5_AXI_wrapper is
 end entity;
 
 
-architecture a1 of Round5_AXI_wrapper is 
+architecture a1 of Round5_AXI_wrapper_v2 is 
 
 component Round5_enc_arith is	
 	port (
