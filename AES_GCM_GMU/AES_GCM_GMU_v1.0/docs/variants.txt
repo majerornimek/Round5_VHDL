@@ -1,0 +1,19 @@
+v1
+    Reference software:
+        aes128gcmv1
+
+    Architecture description:
+        Single-round iterative architecture.
+        AES core does not use an output buffer.
+
+    Key setup time:
+        16
+
+    Execution time of authenticated encryption:
+        2+Na*9+(Nm+1)*11
+
+    Execution time of authenticated decryption:
+        2+Na*9+(Nm+1)*11
+
+    Non-default generic settings:
+        N/A

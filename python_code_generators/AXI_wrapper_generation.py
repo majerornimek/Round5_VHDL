@@ -61,23 +61,23 @@ def generate_mux_output(data_read_clock_cycles, AXI_width, pointer_width ):
     for i in range(0, data_read_clock_cycles[0]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
-        line += output_signal_name + first_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
+        line += output_signal_name + first_part_signal + str((i+1-out_clk)*int(AXI_width)-1) + " downto " + str((i-out_clk)*int(AXI_width)) + ");"
         print(line)
     out_clk += data_read_clock_cycles[0]
 
-    for i in range(out_clk, data_read_clock_cycles[1]):
+    for i in range(out_clk, out_clk+data_read_clock_cycles[1]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
-        line += output_signal_name + second_part_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
+        line += output_signal_name + second_part_signal + str((i+1-out_clk)*int(AXI_width)-1) + " downto " + str((i-out_clk)*int(AXI_width)) + ");"
         print(line)
     out_clk += data_read_clock_cycles[1]
 
-    for i in range(out_clk,data_read_clock_cycles[2]):
+    for i in range(out_clk,out_clk+data_read_clock_cycles[2]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i,pointer_width)) + "\" => \n"
-        line += output_signal_name + dec_msg_signal + str((i+1)*int(AXI_width)-1) + " downto " + str(i*int(AXI_width)) + ");"
+        line += output_signal_name + dec_msg_signal + str((i+1-out_clk)*int(AXI_width)-1) + " downto " + str((i-out_clk)*int(AXI_width)) + ");"
         print(line)
-
+    print("     when others =>")
     print("end case;")
 
 def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
@@ -90,7 +90,7 @@ def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
     # AXI_width_constant  = "AXI_size"
 
     sum_of_clock_cycles = input_clock_cycle[0]
-    print("==========   INPUT ENC  ================")
+    print("-----==========   INPUT ENC  ================")
     print("case input_pointer is\n")
     #ENCRYPTION
     for i in range(0, input_clock_cycle[0]):
@@ -103,8 +103,8 @@ def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
     for i in range(input_clock_cycle[0], sum_of_clock_cycles + input_clock_cycle[1]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += PolyB_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += PolyB_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
 
     sum_of_clock_cycles += input_clock_cycle[1]
@@ -112,8 +112,8 @@ def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
     for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[2]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += PolyR_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += PolyR_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
 
     sum_of_clock_cycles += input_clock_cycle[2]
@@ -121,38 +121,39 @@ def generate_mux_input(input_clock_cycle, AXI_width, pointer_width):
     for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[3]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += Message_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += Message_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
 
     sum_of_clock_cycles += input_clock_cycle[3]
 
-    print("==========   INPUT DEC  ================")
+    print("--==========   INPUT DEC  ================")
 
     #sum_of_clock_cycles = input_clock_cycle[5]
     #DECRYPTION
     for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[1]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += PolyB_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += PolyB_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
-    sum_of_clock_cycles = input_clock_cycle[1]
+    sum_of_clock_cycles += input_clock_cycle[1]
 
     for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[2]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += PolyR_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += PolyR_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
     sum_of_clock_cycles += input_clock_cycle[2]
 
     for i in range(sum_of_clock_cycles, sum_of_clock_cycles + input_clock_cycle[4]):
         line = ""
         line = "    when \"" + str(to_std_logic_vector(i, pointer_width)) + "\" => \n"
-        line += ctV_signal + str((i + 1) * int(AXI_width) - 1) + " downto " + str(
-            i * int(AXI_width)) + ")" + input_signal_name
+        line += ctV_signal + str((i + 1-sum_of_clock_cycles) * int(AXI_width) - 1) + " downto " + str(
+            (i-sum_of_clock_cycles) * int(AXI_width)) + ")" + input_signal_name
         print(line)
+    print("     when others =>")
     print("end case;")
 
 if __name__ == "__main__":
@@ -160,7 +161,7 @@ if __name__ == "__main__":
     print(to_std_logic_vector(3,8))
 
     clock_cycles = [10,20,30]
-    params = [618, 11, 9, 4, 128]
+    params = [618, 11, 8, 4, 128]
     AXI_w = 64
     c_in, c_out = generate_clock_cycle_table(params, AXI_w)
     print(c_in)
