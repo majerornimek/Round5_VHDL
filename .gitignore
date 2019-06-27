@@ -1,3 +1,11 @@
 /Intel_Pro/
-/Intel/
+*/Intel/
+*/Xilinx/
+Xilinx/
 *.bak
+/db/
+/incremental_db/
+/output_files/
+/simulation/
+/.idea/
+*.zip
