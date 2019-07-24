@@ -176,12 +176,14 @@ size_t xef_fixerr(size_t len, unsigned f)
 
     // fix errors
     for (i = 0; i < (len << 3); i++) {
-        printf("\nDla i = %d, ",i);
+        //printf("\nDla i = %d, ",i);
+        //printf("%d, ",i);
         th = 7 - f;
 
         if (pl == 2) {
             //th += (unsigned) (r[0] >> (i >> 4)) & 1;
-            printf(" wartosc pierwszego i>>4: %d",i>>4);
+            //printf(" wartosc pierwszego i>>4: %d",i>>4);
+            printf("(std_logic_vector(to_unsigned(%d,6)), ", i>>4);
             j = 1;
         } else {
             if (f == 5) {
@@ -191,13 +193,15 @@ size_t xef_fixerr(size_t len, unsigned f)
                 j = 0;
             }
         }
-        printf(" przesuniecia w for: ");
+        //printf(" przesuniecia w for: ");
         for (; j < 2 * f; j++) {
             //th += (unsigned) (r[j] >> (i %  xef_reg[f - 1][pl][j])) & 1;
-            printf("%d, ", i%xef_reg[f-1][pl][j]);
+            //printf("%d, ", i%xef_reg[f-1][pl][j]);
+            printf("std_logic_vector(to_unsigned(%d,6)), ", i%xef_reg[f-1][pl][j]);
         }
         // if th > f
 //        v[i >> 3] = (uint8_t) (v[i >> 3] ^ ((th >> 3) << (i & 7)));
+        printf("std_logic_vector(to_unsigned(%d,6))),\n",i&7);
 
     }
 
