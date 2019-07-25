@@ -25,34 +25,48 @@ begin
 
 
 	g: for i in 0 to 255 generate
-		xb: entity work.xef_5d_fixerr_bit port map(
-			v 	=> v((i mod 32) to (i mod 32 + 7)),--v(conv_integer(wire_tab(i,0))*32 to conv_integer(wire_tab(i,0)*32+31)) ,
-			--R   => R,
+		xb: entity work.xef_5d_fixerr_bit 
+			generic map(
+				f_bit_sel => wire_tab(i,0),
+				r_1 => wire_tab(i,1),
+				r_2 => wire_tab(i,2),
+				r_3 => wire_tab(i,3),
+				r_4 => wire_tab(i,4),
+				r_5 => wire_tab(i,5),
+				r_6 => wire_tab(i,6),
+				r_7 => wire_tab(i,7),
+				r_8 => wire_tab(i,8),
+				r_9 => wire_tab(i,9),
+				i_and_7 => wire_tab(i,10)
+			)
+			port map(
+				v 	=> v((i mod 32) to (i mod 32 + 7)),--v(conv_integer(wire_tab(i,0))*32 to conv_integer(wire_tab(i,0)*32+31)) ,
+				R   => R,
+				
+				--f_bit_sel => R(0)(conv_integer(wire_tab(i,0))),
+				--r_0 : in std_logic_vector(5 downto 0);
+				-- r_1 => R(1)(conv_integer(wire_tab(i,1))),
+				-- r_2 => R(2)(conv_integer(wire_tab(i,2))),
+				-- r_3 => R(3)(conv_integer(wire_tab(i,3))),
+				-- r_4 => R(4)(conv_integer(wire_tab(i,4))),
+				-- r_5 => R(5)(conv_integer(wire_tab(i,5))),
+				-- r_6 => R(6)(conv_integer(wire_tab(i,6))),
+				-- r_7 => R(7)(conv_integer(wire_tab(i,7))),
+				-- r_8 => R(8)(conv_integer(wire_tab(i,8))),
+				-- r_9 => R(9)(conv_integer(wire_tab(i,9))),
+				
+				-- i_and_7 => wire_tab(i,10),
+				
+				clk => clk,
+				
+				v_out => v_out(i)
 			
-			f_bit_sel => R(0)(conv_integer(wire_tab(i,0))),
-			--r_0 : in std_logic_vector(5 downto 0);
-			r_1 => R(1)(conv_integer(wire_tab(i,1))),
-			r_2 => R(2)(conv_integer(wire_tab(i,2))),
-			r_3 => R(3)(conv_integer(wire_tab(i,3))),
-			r_4 => R(4)(conv_integer(wire_tab(i,4))),
-			r_5 => R(5)(conv_integer(wire_tab(i,5))),
-			r_6 => R(6)(conv_integer(wire_tab(i,6))),
-			r_7 => R(7)(conv_integer(wire_tab(i,7))),
-			r_8 => R(8)(conv_integer(wire_tab(i,8))),
-			r_9 => R(9)(conv_integer(wire_tab(i,9))),
-			
-			i_and_7 => wire_tab(i,10),
-			
-			clk => clk,
-			
-			v_out => v_out(i)
-		
-		);
+			);
 
 	end generate;
 	
 	x:for i in 0 to 31 generate
-		v_res(i) <= (((v_out(8*i) xor v_out(8*i+1)));-- xor (v_out(8*i+2) xor v_out(8*i+3))) xor ((v_out(8*i+4) xor v_out(8*i+5)) xor (v_out(8*i+6) xor v_out(8*i+7)))) xor v(i*8 to i*8+7);
+		v_res(i) <= (((v_out(8*i) xor v_out(8*i+1))) xor (v_out(8*i+2) xor v_out(8*i+3))) xor ((v_out(8*i+4) xor v_out(8*i+5)) xor (v_out(8*i+6) xor v_out(8*i+7))) xor v(i*8 to i*8+7) ;
 	end generate;
 
 
