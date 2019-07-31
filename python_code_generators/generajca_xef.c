@@ -63,10 +63,10 @@ const unsigned xef_reg[5][3][10] = {
 
 //  Computes the parity code, XORs it at the end of payload
 //  len = payload (bytes). Returns (payload | xef) length in *bits*.
-/*
-size_t xef_compute(void *block, size_t len, unsigned f)
+
+size_t xef_compute(size_t len, unsigned f)
 {
-    uint8_t *v = (uint8_t *) block;
+    //uint8_t *v = (uint8_t *) block;
     size_t i, j, l, bit, pl;
     uint64_t x, t, r[10];
 
@@ -92,19 +92,19 @@ size_t xef_compute(void *block, size_t len, unsigned f)
     // reduce the polynomials
     bit = 0;
     for (i = 0; i < len; i++) {
-        x = (uint64_t) v[i];
+        //x = (uint64_t) v[i];
 
         // special parity
         if (pl == 2 || f == 5) {
-            t = x;
-            t ^= t >> 4;
-            t ^= t >> 2;
-            t ^= t >> 1;
+           // t = x;
+           // t ^= t >> 4;
+           // t ^= t >> 2;
+           // t ^= t >> 1;
 
-            if (pl == 2)
-                r[0] ^= (t & 1) << (i >> 1);
-            else
-                r[0] ^= (t & 1) << i;
+            //if (pl == 2)
+             //   r[0] ^= (t & 1) << (i >> 1);
+            //else
+              //  r[0] ^= (t & 1) << i;
             j = 1;
         } else {
             j = 0;
@@ -112,9 +112,11 @@ size_t xef_compute(void *block, size_t len, unsigned f)
 
         // cyclic polynomial case
         for (; j < 2 * f; j++) {
-            r[j] ^= x << (bit % xef_reg[f - 1][pl][j]);
+           // r[j] ^= x << (bit % xef_reg[f - 1][pl][j]);
+            printf("%d, ", bit % xef_reg[f-1][pl][j]);
 
         }
+        printf("|\n");
         bit += 8;
     }
 
@@ -123,18 +125,21 @@ size_t xef_compute(void *block, size_t len, unsigned f)
     for (i = 0; i < 2 * f; i++) {
 
         l = xef_reg[f - 1][pl][i];      // len
-        x = r[i];
-        x ^= x >> l;
+        //x = r[i];
+        //x ^= x >> l;
 
         for (j = 0; j < l; j++) {
-            v[bit >> 3] = (uint8_t) (v[bit >> 3] ^ (((x >> j) & 1) << (bit & 7)));
+           // v[bit >> 3] = (uint8_t) (v[bit >> 3] ^ (((x >> j) & 1) << (bit & 7)));
+            printf("%d, %d, %d, %d, %d, %d\n", i, j, l, bit, bit>>3, bit & 7);
             bit++;
         }
     }
 
+    // return the true length
+    printf("BIT LEN: %d\n", bit);
     return bit;
 }
-*/
+
 //  Fixes errors based on parity code. Call xef_compute() first to get delta.
 //  len = payload (bytes). Returns (payload | xef) length in *bits*.
 
@@ -169,11 +174,12 @@ size_t xef_fixerr(size_t len, unsigned f)
         l = xef_reg[f - 1][pl][i];      // len
         for (j = 0; j < l; j++) {
             //r[i] ^= ((uint64_t) ((v[bit >> 3] >> (bit & 7)) & 1)) << j;
-            
+            printf("%d, %d, %d, %d, %d\n", i, j, l, bit>>3, bit & 7);
+
             bit++;
         }
     }
-
+    printf("-------------------------\n");
     // fix errors
     for (i = 0; i < (len << 3); i++) {
         //printf("\nDla i = %d, ",i);
@@ -182,8 +188,8 @@ size_t xef_fixerr(size_t len, unsigned f)
 
         if (pl == 2) {
             //th += (unsigned) (r[0] >> (i >> 4)) & 1;
-            //printf(" wartosc pierwszego i>>4: %d",i>>4);
-            printf("(std_logic_vector(to_unsigned(%d,6)), ", i>>4);
+            printf(" %d, ",i>>4);
+            //printf("(std_logic_vector(to_unsigned(%d,6)), ", i>>4);
             j = 1;
         } else {
             if (f == 5) {
@@ -196,23 +202,28 @@ size_t xef_fixerr(size_t len, unsigned f)
         //printf(" przesuniecia w for: ");
         for (; j < 2 * f; j++) {
             //th += (unsigned) (r[j] >> (i %  xef_reg[f - 1][pl][j])) & 1;
-            //printf("%d, ", i%xef_reg[f-1][pl][j]);
-            printf("std_logic_vector(to_unsigned(%d,6)), ", i%xef_reg[f-1][pl][j]);
+            printf("%d, ", i%xef_reg[f-1][pl][j]);
+            //printf("std_logic_vector(to_unsigned(%d,6)), ", i%xef_reg[f-1][pl][j]);
         }
         // if th > f
 //        v[i >> 3] = (uint8_t) (v[i >> 3] ^ ((th >> 3) << (i & 7)));
-        printf("std_logic_vector(to_unsigned(%d,6))),\n",i&7);
-
+        //printf("std_logic_vector(to_unsigned(%d,6))),\n",i&7);
+        printf("%d, %d \n", i >>3, i&7);
     }
 
     // return the true length
+    printf("BIT LEN: %d\n", bit);
     return bit;
 }
 
 
 void main()
 {
+    
+    printf("FIXERR: ======================================\n");
     xef_fixerr(32,5);
+    printf("COMPUTE: =====================================\n");
+    xef_compute(32,5);
     return 0;
 
 }
