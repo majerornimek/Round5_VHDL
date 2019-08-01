@@ -88,7 +88,7 @@ size_t xef_compute(size_t len, unsigned f)
     }
 
     memset(r, 0, sizeof(r));
-
+    printf("---- Reduce polynomials ---\n");
     // reduce the polynomials
     bit = 0;
     for (i = 0; i < len; i++) {
@@ -109,19 +109,19 @@ size_t xef_compute(size_t len, unsigned f)
         } else {
             j = 0;
         }
-
+	printf("(");
         // cyclic polynomial case
         for (; j < 2 * f; j++) {
            // r[j] ^= x << (bit % xef_reg[f - 1][pl][j]);
             printf("%d, ", bit % xef_reg[f-1][pl][j]);
 
         }
-        printf("|\n");
+        printf("),\n");
         bit += 8;
     }
 
     // pack the result (or rather, XOR over the original)
-
+    printf("-----  PACK THE RESULTS -----\n");
     for (i = 0; i < 2 * f; i++) {
 
         l = xef_reg[f - 1][pl][i];      // len
@@ -130,7 +130,7 @@ size_t xef_compute(size_t len, unsigned f)
 
         for (j = 0; j < l; j++) {
            // v[bit >> 3] = (uint8_t) (v[bit >> 3] ^ (((x >> j) & 1) << (bit & 7)));
-            printf("%d, %d, %d, %d, %d, %d\n", i, j, l, bit, bit>>3, bit & 7);
+            printf("(%d, %d, %d, %d, %d, %d),\n", i, j, l, bit, bit>>3, bit & 7);
             bit++;
         }
     }
@@ -169,23 +169,24 @@ size_t xef_fixerr(size_t len, unsigned f)
 
     // unpack the registers
     //memset(r, 0, sizeof(r));
+    printf("--------- UNPACKING THE REGISTERS ------\n");
     bit = len << 3;
     for (i = 0; i < 2 * f; i++) {
         l = xef_reg[f - 1][pl][i];      // len
         for (j = 0; j < l; j++) {
             //r[i] ^= ((uint64_t) ((v[bit >> 3] >> (bit & 7)) & 1)) << j;
-            printf("%d, %d, %d, %d, %d\n", i, j, l, bit>>3, bit & 7);
+            printf("(%d, %d, %d, %d, %d),\n", i, j, l, bit>>3, bit & 7);
 
             bit++;
         }
     }
-    printf("-------------------------\n");
+    printf("---------- FIX -----------\n");
     // fix errors
     for (i = 0; i < (len << 3); i++) {
         //printf("\nDla i = %d, ",i);
         //printf("%d, ",i);
         th = 7 - f;
-
+	printf("(");
         if (pl == 2) {
             //th += (unsigned) (r[0] >> (i >> 4)) & 1;
             printf(" %d, ",i>>4);
@@ -208,7 +209,7 @@ size_t xef_fixerr(size_t len, unsigned f)
         // if th > f
 //        v[i >> 3] = (uint8_t) (v[i >> 3] ^ ((th >> 3) << (i & 7)));
         //printf("std_logic_vector(to_unsigned(%d,6))),\n",i&7);
-        printf("%d, %d \n", i >>3, i&7);
+        printf("%d, %d), \n", i >>3, i&7);
     }
 
     // return the true length
