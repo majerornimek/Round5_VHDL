@@ -7,16 +7,16 @@ use IEEE.math_real.all;
 
 package XEf_constants_P5_5d is  
 
-type RTab is array(natural range<>) of std_logic_vector(63 downto 0);
-type BitTab is array(natural range<>) of std_logic_vector(7 downto 0);
+--type RTab is array(natural range<>) of std_logic_vector(63 downto 0);
+--type BitTab is array(natural range<>) of std_logic_vector(7 downto 0);
 
-type ff is array(0 to 255, 0 to 10) of integer; -- fixerr fix
+type fef is array(0 to 255, 0 to 11) of integer; -- fixerr fix
 type fu is array(0 to 233, 0 to 4) of integer;  -- fixerr unpack
-type cp is array(0 to 233, 0 to 5) of integer; 	-- compute pack
-type cr is array(0 to 31, 0 to 8) of integer; 	-- compue reduce poly
+type cop is array(0 to 233, 0 to 5) of integer; 	-- compute pack
+type cor is array(0 to 31, 0 to 8) of integer; 	-- compue reduce poly
 
 
-constant XEf_fixerr_unpack :=
+constant XEf_fixerr_unpack : fu :=
 (
 (0, 0, 16, 32, 0),
 (0, 1, 16, 32, 1),
@@ -255,7 +255,7 @@ constant XEf_fixerr_unpack :=
 );
 
 
-constant XEf_fixerr_tab : ff :=
+constant XEf_fixerr_tab : fef :=
 (
 ( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), 
 ( 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1), 
@@ -515,7 +515,7 @@ constant XEf_fixerr_tab : ff :=
 ( 15, 15, 0, 8, 3, 2, 5, 23, 7, 33, 31, 7)
 );
 
-constant XEf_reduce_poly : cr :=
+constant XEf_reduce_poly : cor :=
 (
 (0, 0, 0, 0, 0, 0, 0, 0, 0),
 (8, 8, 8, 8, 8, 8, 8, 8, 8),
@@ -551,7 +551,7 @@ constant XEf_reduce_poly : cr :=
 (8, 10, 1, 17, 18, 23, 16, 0, 26)
 );
 
-constant XEf_compute_pack : cp :=
+constant XEf_compute_pack : cop :=
 (
 (0, 0, 16, 256, 32, 0),
 (0, 1, 16, 257, 32, 1),

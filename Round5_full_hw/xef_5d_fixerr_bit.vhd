@@ -7,6 +7,7 @@ use IEEE.math_real.all;
 library work;
 --use work.Round5_constants.all; 
 use work.XEf_constants.all; 
+use work.XEf_constants_P5_5d.all;
 
 entity xef_5d_fixerr_bit is
 	generic(

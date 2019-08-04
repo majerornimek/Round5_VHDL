@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use IEEE.math_real.all;
 
 library work;
-use work.XEf_constants_P5_5d.all -- wybor algo
+use work.XEf_constants_P5_5d.all; -- wybor algo
 
 
 package XEf_constants is  
@@ -15,8 +15,8 @@ type BitTab is array(natural range<>) of std_logic_vector(7 downto 0);
 
 
 constant fixerr_unpack 	: fu := XEf_fixerr_unpack;
-constant fixerr_tab	: ff := XEf_fixerr_tab;
-constant reduce_poly	: cr := XEf_reduce_poly;
-constant compute_pack 	: cp := XEf_compute_pack;
+constant fixerr_tab		: fef := XEf_fixerr_tab;
+constant reduce_poly	: cor := XEf_reduce_poly;
+constant compute_pack 	: cop := XEf_compute_pack;
 
 end package;
