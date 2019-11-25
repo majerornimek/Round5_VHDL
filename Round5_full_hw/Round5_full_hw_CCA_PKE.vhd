@@ -91,7 +91,7 @@ hash_clk <= clk;
 aead_clk <= clk;
 arithm_clk <= clk;
 
-	arithm: entity work.Round5_enc_arith_wrapper(R5ND_3PKE_0d)
+	arithm: entity work.Round5_enc_arith_wrapper(R5ND_5PKE_5d)
 		port map(
 			clk => arithm_clk,
 			rst => arithm_rst,

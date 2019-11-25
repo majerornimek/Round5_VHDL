@@ -1,0 +1,117 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 2018  Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel FPGA IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Intel and sold by Intel or its authorized distributors.  Please
+# refer to the applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus Prime
+# Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+# Date created = 21:58:58  March 17, 2019
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		Round5_VHDL_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus Prime software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY "Arria 10"
+set_global_assignment -name DEVICE 10AX115S2F45I1SG
+set_global_assignment -name TOP_LEVEL_ENTITY Round5_AXI_wrapper
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:58:58  MARCH 17, 2019"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 2
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP "-40"
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 100
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim (VHDL)"
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name PROJECT_IP_REGENERATION_POLICY NEVER_REGENERATE_IP
+set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
+set_global_assignment -name VHDL_FILE ../Round5_full_hw/XEf_constants_P5_5d.vhd
+set_global_assignment -name VHDL_FILE ../Round5_full_hw/xef_5f_fixerr.vhd
+set_global_assignment -name VHDL_FILE ../Round5_full_hw/XEf_constants.vhd
+set_global_assignment -name VHDL_FILE ../Round5_full_hw/xef_5d_fixerr_bit.vhd
+set_global_assignment -name VHDL_FILE ../Round5_constants_SHAKE.vhd
+set_global_assignment -name VHDL_FILE ../Round5_AXI_wrapper_v4_packed_with_SHAKE.vhd
+set_global_assignment -name VHDL_FILE ../Round5_AXI_wrapper.vhd
+set_global_assignment -name VHDL_FILE ../Round5_constants.vhd
+set_global_assignment -name VHDL_FILE ../Round5_enc_arith.vhd
+set_global_assignment -name VHDL_FILE ../Mul_Poly.vhd
+set_global_assignment -name VHDL_FILE ../Mul_Poly_NTRU.vhd
+set_global_assignment -name VHDL_FILE ../Mul_Poly_NTRU_tri_unit.vhd
+set_global_assignment -name VHDL_FILE ../Lift_Poly.vhd
+set_global_assignment -name VHDL_FILE ../Unlift_Poly.vhd
+set_global_assignment -name VHDL_FILE ../round_poly_ex.vhd
+set_global_assignment -name VHDL_FILE ../round_element_ex.vhd
+set_global_assignment -name VHDL_FILE ../add_sub_unit.vhd
+set_global_assignment -name VHDL_FILE ../add_sub_poly.vhd
+set_global_assignment -name VHDL_FILE ../Testbenche/Round5_enc_arith_TB.vhd
+set_global_assignment -name VHDL_FILE ../Testbenche/Mul_Poly_TB.vhd
+set_global_assignment -name VHDL_FILE ../Testbenche/Lift_poly_TB.vhd
+set_global_assignment -name VHDL_FILE ../Testbenche/Unlift_poly_TB.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/sr_reg.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/sipo.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/sha3_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/sha3_fsm3.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/regn.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/piso.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_top.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_round.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_fsm2.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_fsm1.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_datapath.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_control.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_cons.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/keccak_bytepad.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/src_fixed/countern.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/tb/fifo_ram.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/tb/fifo.vhd
+set_global_assignment -name VHDL_FILE ../../../../Dropbox/TCHES_2019_SW_HW/SHAKE/tb/sha_tb_pkg.vhd
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_instance_assignment -name VIRTUAL_PIN ON -to PolyA
+set_instance_assignment -name VIRTUAL_PIN ON -to PolyB
+set_instance_assignment -name VIRTUAL_PIN ON -to LongRes
+set_instance_assignment -name VIRTUAL_PIN ON -to ShortRes
+set_instance_assignment -name VIRTUAL_PIN ON -to PolyR
+set_instance_assignment -name VIRTUAL_PIN ON -to Result
+set_instance_assignment -name VIRTUAL_PIN ON -to FirstPart
+set_instance_assignment -name VIRTUAL_PIN ON -to SecondPart
+set_instance_assignment -name VIRTUAL_PIN ON -to Message
+set_instance_assignment -name VIRTUAL_PIN ON -to Dec_Msg
+set_instance_assignment -name VIRTUAL_PIN ON -to ctV
+set_instance_assignment -name VIRTUAL_PIN ON -to R
+set_instance_assignment -name VIRTUAL_PIN ON -to v
+set_instance_assignment -name VIRTUAL_PIN ON -to v_out
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

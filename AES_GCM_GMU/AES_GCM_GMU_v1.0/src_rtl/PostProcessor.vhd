@@ -306,11 +306,11 @@ begin
         cmd_sgmt_partial <= cmd(24-5);
     end generate;
     gNotCiphExp:
-    if (not G_CIPH_EXP) generate
-        is_ciph_exp_len  <= '0';
-        ld_ciph_exp_len  <= '0';
-        cmd_sgmt_partial <= '0';
-    end generate;
+--    if (not G_CIPH_EXP) generate
+--        is_ciph_exp_len  <= '0';
+--        ld_ciph_exp_len  <= '0';
+--        cmd_sgmt_partial <= '0';
+--    end generate;
     cmd_sgmt_eot <= cmd(24-7);
     cmd_sgmt_eoi <= cmd(24-8);
     cmd_sgmt_len <= cmd(24-9 downto 24-24);

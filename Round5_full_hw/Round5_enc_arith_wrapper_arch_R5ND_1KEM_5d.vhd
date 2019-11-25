@@ -1,12 +1,13 @@
-architecture R5ND_3PKE_0d of Round5_enc_arith_wrapper is 
-component Round5_enc_arith is	
+architecture R5ND_1KEM_5d of Round5_enc_arith_wrapper is 
+
+component Round5_enc_arith_xef is	
 	port (
 		PolyA			: in q_bitsPoly(PolyDegree-1 downto 0);  --W enc: A
 		PolyB			: in p_bitsPoly(PolyDegree downto 0);	--W enc: polyB,   W dec: polyU
 		PolyR			: in Trinomial(PolyDegree-1 downto 0); --W enc: poly R   W dec: polyS
 		Message		    : in std_logic_vector(MessageLen-1 downto 0);
 		ctV             : in t_bitsPoly(MessageLen-1  downto 0);
-        
+      XEf_code_in	: in std_logic_vector(0 to code_len-1); 
         
 		clk			: in std_logic;
 		Start			: in std_logic;
@@ -16,6 +17,7 @@ component Round5_enc_arith is
         
 		FirstPart	: out p_bitsPoly(PolyDegree-1 downto 0);
 		SecondPart	: out t_bitsPoly(MessageLen-1  downto 0);
+      Xef_code_out: out std_logic_vector(0 to code_len-1);
         
 		Dec_Msg		: out std_logic_vector(MessageLen-1 downto 0)
 	);
@@ -43,7 +45,7 @@ constant input_msg_cmd 		: std_logic_vector(7 downto 0) := "00010001";
 constant input_Bdec_cmd	 	: std_logic_vector(7 downto 0) := "00000100";
 constant input_Rdec_cmd	 	: std_logic_vector(7 downto 0) := "00000010";
 constant input_V_cmd	 	: std_logic_vector(7 downto 0) := "00000001";
-constant input_X_cmd		: std_logic_vector(7 downto 0) := "00001000";
+
 
 
 
@@ -55,6 +57,8 @@ signal PolyB_tmp 	: std_logic_vector(PolyB_cycle*AXI_data_width-1 downto 0);
 signal PolyR_tmp 	: std_logic_vector(PolyR_cycle*AXI_data_width-1 downto 0);	-- filled by S_FIFO in enc and dec
 signal Message_tmp 	: std_logic_vector(Message_cycle*AXI_data_width-1 downto 0);
 signal ctV_tmp		: std_logic_vector(ctV_cycle*AXI_data_width-1 downto 0);
+signal xef_in_tmp, xef_out_tmp : std_logic_vector(0 to XEf_cycle*AXI_data_width-1);
+
 
 signal FirstPart_tmp	: std_logic_vector(FirstPart_cycle*AXI_data_width-1 downto 0);
 signal SecondPart_tmp	: std_logic_vector(SecondPart_cycle*AXI_data_width-1 downto 0);
@@ -78,7 +82,7 @@ signal PolyR_poly  : Trinomial(PolyDegree-1 downto 0);
 signal ctV_poly    : t_bitsPoly(PolyDegree-1 downto 0);
 signal FirstPart_poly : p_bitsPoly(PolyDegree-1 downto 0);
 signal SecondPart_poly: t_bitsPoly(MessageLen-1 downto 0);
-
+signal xef_input, xef_output : std_logic_vector(0 to code_len-1);
 
 -------------------- SHAKE FIFO SIGNAL ETC
 signal S_Reset, fifoin_read, fifoin_empty, fifoout_full, fifoout_write : std_logic;
@@ -94,13 +98,13 @@ signal RECIVED_CMD		: std_logic := '0';
 begin 
 
 --------  DEMUX CODE THERE.
-	arit: Round5_enc_arith port map(
+	arit: Round5_enc_arith_xef port map(
 		PolyA			=> PolyA_poly(PolyDegree-1 downto 0),
 		PolyB			=> PolyB_poly(PolyDegree downto 0),
 		PolyR			=> PolyR_poly(PolyDegree-1 downto 0),
 		Message		    => Message_tmp(MessageLen-1 downto 0),
 		ctV             => ctV_poly(MessageLen-1 downto 0),
-        
+      XEf_code_in		=> xef_input,  
         
 		clk			=> clk,
 		Start		=> start_module,
@@ -110,6 +114,7 @@ begin
 		
 		FirstPart	=> FirstPart_poly,
 		SecondPart	=> SecondPart_poly,
+		XEf_code_out => xef_output,
   
 		Dec_Msg		=> Dec_Msg_tmp(MessageLen-1 downto 0)
 	);
@@ -138,7 +143,9 @@ SP_tmp: for i in 0 to MessageLen-1 generate
     SecondPart_tmp((i+1)*t_bits-1 downto i*t_bits) <= SecondPart_poly(i); 
 end generate SP_tmp;
 
-		
+xef_input <= xef_in_tmp(0 to code_len-1);
+xef_out_tmp(0 to code_len-1) <= xef_output;
+xef_out_tmp(code_len to XEf_cycle*AXI_data_width-1) <= (others=> '0');		
 		
 process(clk)
 begin
@@ -170,9 +177,6 @@ begin
 					when input_V_cmd => 		-- Decryption, ctV
 						input_pointer 		<= std_logic_vector(to_unsigned(ctV_cycle_start,10));
 						input_pointer_max 	<= std_logic_vector(to_unsigned(ctV_cycle_end,10));
-					when input_X_cmd => 
-						input_pointer 		<= std_logic_vector(to_unsigned(xef_cycle_start,10));
-						input_pointer_max 	<= std_logic_vector(to_unsigned(xef_cycle_end,10));
 					when others => 
 
 				end case;
@@ -199,9 +203,14 @@ end process;
 
 		
 		
-process(clk)
+process(rst,clk)
 begin
-	if clk'event and clk = '1' then 
+	if rst = '1' then
+		output_pointer <= (others => '0');
+		output_pointer_max <= (others => '0');
+		FIFO_Empty <= '1';
+		
+	elsif clk'event and clk = '1' then 
 		if FIFO_rd_en = '1' then 
 			if output_pointer < output_pointer_max then
 				output_pointer <= output_pointer + '1';
@@ -402,483 +411,177 @@ PolyA_tmp(4863 downto 4800) <= FIFO_din;
         when "0001001100" => 
 PolyA_tmp(4927 downto 4864) <= FIFO_din;
         when "0001001101" => 
-PolyA_tmp(4991 downto 4928) <= FIFO_din;
-        when "0001001110" => 
-PolyA_tmp(5055 downto 4992) <= FIFO_din;
-        when "0001001111" => 
-PolyA_tmp(5119 downto 5056) <= FIFO_din;
-        when "0001010000" => 
-PolyA_tmp(5183 downto 5120) <= FIFO_din;
-        when "0001010001" => 
-PolyA_tmp(5247 downto 5184) <= FIFO_din;
-        when "0001010010" => 
-PolyA_tmp(5311 downto 5248) <= FIFO_din;
-        when "0001010011" => 
-PolyA_tmp(5375 downto 5312) <= FIFO_din;
-        when "0001010100" => 
-PolyA_tmp(5439 downto 5376) <= FIFO_din;
-        when "0001010101" => 
-PolyA_tmp(5503 downto 5440) <= FIFO_din;
-        when "0001010110" => 
-PolyA_tmp(5567 downto 5504) <= FIFO_din;
-        when "0001010111" => 
-PolyA_tmp(5631 downto 5568) <= FIFO_din;
-        when "0001011000" => 
-PolyA_tmp(5695 downto 5632) <= FIFO_din;
-        when "0001011001" => 
-PolyA_tmp(5759 downto 5696) <= FIFO_din;
-        when "0001011010" => 
-PolyA_tmp(5823 downto 5760) <= FIFO_din;
-        when "0001011011" => 
-PolyA_tmp(5887 downto 5824) <= FIFO_din;
-        when "0001011100" => 
-PolyA_tmp(5951 downto 5888) <= FIFO_din;
-        when "0001011101" => 
-PolyA_tmp(6015 downto 5952) <= FIFO_din;
-        when "0001011110" => 
-PolyA_tmp(6079 downto 6016) <= FIFO_din;
-        when "0001011111" => 
-PolyA_tmp(6143 downto 6080) <= FIFO_din;
-        when "0001100000" => 
-PolyA_tmp(6207 downto 6144) <= FIFO_din;
-        when "0001100001" => 
-PolyA_tmp(6271 downto 6208) <= FIFO_din;
-        when "0001100010" => 
-PolyA_tmp(6335 downto 6272) <= FIFO_din;
-        when "0001100011" => 
-PolyA_tmp(6399 downto 6336) <= FIFO_din;
-        when "0001100100" => 
-PolyA_tmp(6463 downto 6400) <= FIFO_din;
-        when "0001100101" => 
-PolyA_tmp(6527 downto 6464) <= FIFO_din;
-        when "0001100110" => 
-PolyA_tmp(6591 downto 6528) <= FIFO_din;
-        when "0001100111" => 
-PolyA_tmp(6655 downto 6592) <= FIFO_din;
-        when "0001101000" => 
-PolyA_tmp(6719 downto 6656) <= FIFO_din;
-        when "0001101001" => 
-PolyA_tmp(6783 downto 6720) <= FIFO_din;
-        when "0001101010" => 
-PolyA_tmp(6847 downto 6784) <= FIFO_din;
-        when "0001101011" => 
-PolyA_tmp(6911 downto 6848) <= FIFO_din;
-        when "0001101100" => 
-PolyA_tmp(6975 downto 6912) <= FIFO_din;
-        when "0001101101" => 
-PolyA_tmp(7039 downto 6976) <= FIFO_din;
-        when "0001101110" => 
-PolyA_tmp(7103 downto 7040) <= FIFO_din;
-        when "0001101111" => 
-PolyA_tmp(7167 downto 7104) <= FIFO_din;
-        when "0001110000" => 
-PolyA_tmp(7231 downto 7168) <= FIFO_din;
-        when "0001110001" => 
-PolyA_tmp(7295 downto 7232) <= FIFO_din;
-        when "0001110010" => 
-PolyA_tmp(7359 downto 7296) <= FIFO_din;
-        when "0001110011" => 
-PolyA_tmp(7423 downto 7360) <= FIFO_din;
-        when "0001110100" => 
-PolyA_tmp(7487 downto 7424) <= FIFO_din;
-        when "0001110101" => 
-PolyA_tmp(7551 downto 7488) <= FIFO_din;
-        when "0001110110" => 
-PolyA_tmp(7615 downto 7552) <= FIFO_din;
-        when "0001110111" => 
-PolyA_tmp(7679 downto 7616) <= FIFO_din;
-        when "0001111000" => 
-PolyA_tmp(7743 downto 7680) <= FIFO_din;
-        when "0001111001" => 
-PolyA_tmp(7807 downto 7744) <= FIFO_din;
-        when "0001111010" => 
-PolyA_tmp(7871 downto 7808) <= FIFO_din;
-        when "0001111011" => 
-PolyA_tmp(7935 downto 7872) <= FIFO_din;
-        when "0001111100" => 
-PolyA_tmp(7999 downto 7936) <= FIFO_din;
-        when "0001111101" => 
-PolyA_tmp(8063 downto 8000) <= FIFO_din;
-        when "0001111110" => 
-PolyA_tmp(8127 downto 8064) <= FIFO_din;
-        when "0001111111" => 
-PolyA_tmp(8191 downto 8128) <= FIFO_din;
-        when "0010000000" => 
-PolyA_tmp(8255 downto 8192) <= FIFO_din;
-        when "0010000001" => 
-PolyA_tmp(8319 downto 8256) <= FIFO_din;
-        when "0010000010" => 
-PolyA_tmp(8383 downto 8320) <= FIFO_din;
-        when "0010000011" => 
-PolyA_tmp(8447 downto 8384) <= FIFO_din;
-        when "0010000100" => 
-PolyA_tmp(8511 downto 8448) <= FIFO_din;
-        when "0010000101" => 
-PolyA_tmp(8575 downto 8512) <= FIFO_din;
-        when "0010000110" => 
-PolyA_tmp(8639 downto 8576) <= FIFO_din;
-        when "0010000111" => 
-PolyA_tmp(8703 downto 8640) <= FIFO_din;
-        when "0010001000" => 
-PolyA_tmp(8767 downto 8704) <= FIFO_din;
-        when "0010001001" => 
-PolyA_tmp(8831 downto 8768) <= FIFO_din;
-        when "0010001010" => 
-PolyA_tmp(8895 downto 8832) <= FIFO_din;
-        when "0010001011" => 
-PolyA_tmp(8959 downto 8896) <= FIFO_din;
-        when "0010001100" => 
-PolyA_tmp(9023 downto 8960) <= FIFO_din;
-        when "0010001101" => 
-PolyA_tmp(9087 downto 9024) <= FIFO_din;
-        when "0010001110" => 
-PolyA_tmp(9151 downto 9088) <= FIFO_din;
-        when "0010001111" => 
-PolyA_tmp(9215 downto 9152) <= FIFO_din;
-        when "0010010000" => 
-PolyA_tmp(9279 downto 9216) <= FIFO_din;
-        when "0010010001" => 
-PolyA_tmp(9343 downto 9280) <= FIFO_din;
-        when "0010010010" => 
-PolyA_tmp(9407 downto 9344) <= FIFO_din;
-        when "0010010011" => 
 PolyB_tmp(63 downto 0) <= FIFO_din;
-        when "0010010100" => 
+        when "0001001110" => 
 PolyB_tmp(127 downto 64) <= FIFO_din;
-        when "0010010101" => 
+        when "0001001111" => 
 PolyB_tmp(191 downto 128) <= FIFO_din;
-        when "0010010110" => 
+        when "0001010000" => 
 PolyB_tmp(255 downto 192) <= FIFO_din;
-        when "0010010111" => 
+        when "0001010001" => 
 PolyB_tmp(319 downto 256) <= FIFO_din;
-        when "0010011000" => 
+        when "0001010010" => 
 PolyB_tmp(383 downto 320) <= FIFO_din;
-        when "0010011001" => 
+        when "0001010011" => 
 PolyB_tmp(447 downto 384) <= FIFO_din;
-        when "0010011010" => 
+        when "0001010100" => 
 PolyB_tmp(511 downto 448) <= FIFO_din;
-        when "0010011011" => 
+        when "0001010101" => 
 PolyB_tmp(575 downto 512) <= FIFO_din;
-        when "0010011100" => 
+        when "0001010110" => 
 PolyB_tmp(639 downto 576) <= FIFO_din;
-        when "0010011101" => 
+        when "0001010111" => 
 PolyB_tmp(703 downto 640) <= FIFO_din;
-        when "0010011110" => 
+        when "0001011000" => 
 PolyB_tmp(767 downto 704) <= FIFO_din;
-        when "0010011111" => 
+        when "0001011001" => 
 PolyB_tmp(831 downto 768) <= FIFO_din;
-        when "0010100000" => 
+        when "0001011010" => 
 PolyB_tmp(895 downto 832) <= FIFO_din;
-        when "0010100001" => 
+        when "0001011011" => 
 PolyB_tmp(959 downto 896) <= FIFO_din;
-        when "0010100010" => 
+        when "0001011100" => 
 PolyB_tmp(1023 downto 960) <= FIFO_din;
-        when "0010100011" => 
+        when "0001011101" => 
 PolyB_tmp(1087 downto 1024) <= FIFO_din;
-        when "0010100100" => 
+        when "0001011110" => 
 PolyB_tmp(1151 downto 1088) <= FIFO_din;
-        when "0010100101" => 
+        when "0001011111" => 
 PolyB_tmp(1215 downto 1152) <= FIFO_din;
-        when "0010100110" => 
+        when "0001100000" => 
 PolyB_tmp(1279 downto 1216) <= FIFO_din;
-        when "0010100111" => 
+        when "0001100001" => 
 PolyB_tmp(1343 downto 1280) <= FIFO_din;
-        when "0010101000" => 
+        when "0001100010" => 
 PolyB_tmp(1407 downto 1344) <= FIFO_din;
-        when "0010101001" => 
+        when "0001100011" => 
 PolyB_tmp(1471 downto 1408) <= FIFO_din;
-        when "0010101010" => 
+        when "0001100100" => 
 PolyB_tmp(1535 downto 1472) <= FIFO_din;
-        when "0010101011" => 
+        when "0001100101" => 
 PolyB_tmp(1599 downto 1536) <= FIFO_din;
-        when "0010101100" => 
+        when "0001100110" => 
 PolyB_tmp(1663 downto 1600) <= FIFO_din;
-        when "0010101101" => 
+        when "0001100111" => 
 PolyB_tmp(1727 downto 1664) <= FIFO_din;
-        when "0010101110" => 
+        when "0001101000" => 
 PolyB_tmp(1791 downto 1728) <= FIFO_din;
-        when "0010101111" => 
+        when "0001101001" => 
 PolyB_tmp(1855 downto 1792) <= FIFO_din;
-        when "0010110000" => 
+        when "0001101010" => 
 PolyB_tmp(1919 downto 1856) <= FIFO_din;
-        when "0010110001" => 
+        when "0001101011" => 
 PolyB_tmp(1983 downto 1920) <= FIFO_din;
-        when "0010110010" => 
+        when "0001101100" => 
 PolyB_tmp(2047 downto 1984) <= FIFO_din;
-        when "0010110011" => 
+        when "0001101101" => 
 PolyB_tmp(2111 downto 2048) <= FIFO_din;
-        when "0010110100" => 
+        when "0001101110" => 
 PolyB_tmp(2175 downto 2112) <= FIFO_din;
-        when "0010110101" => 
+        when "0001101111" => 
 PolyB_tmp(2239 downto 2176) <= FIFO_din;
-        when "0010110110" => 
+        when "0001110000" => 
 PolyB_tmp(2303 downto 2240) <= FIFO_din;
-        when "0010110111" => 
+        when "0001110001" => 
 PolyB_tmp(2367 downto 2304) <= FIFO_din;
-        when "0010111000" => 
+        when "0001110010" => 
 PolyB_tmp(2431 downto 2368) <= FIFO_din;
-        when "0010111001" => 
+        when "0001110011" => 
 PolyB_tmp(2495 downto 2432) <= FIFO_din;
-        when "0010111010" => 
+        when "0001110100" => 
 PolyB_tmp(2559 downto 2496) <= FIFO_din;
-        when "0010111011" => 
+        when "0001110101" => 
 PolyB_tmp(2623 downto 2560) <= FIFO_din;
-        when "0010111100" => 
+        when "0001110110" => 
 PolyB_tmp(2687 downto 2624) <= FIFO_din;
-        when "0010111101" => 
+        when "0001110111" => 
 PolyB_tmp(2751 downto 2688) <= FIFO_din;
-        when "0010111110" => 
+        when "0001111000" => 
 PolyB_tmp(2815 downto 2752) <= FIFO_din;
-        when "0010111111" => 
+        when "0001111001" => 
 PolyB_tmp(2879 downto 2816) <= FIFO_din;
-        when "0011000000" => 
+        when "0001111010" => 
 PolyB_tmp(2943 downto 2880) <= FIFO_din;
-        when "0011000001" => 
+        when "0001111011" => 
 PolyB_tmp(3007 downto 2944) <= FIFO_din;
-        when "0011000010" => 
+        when "0001111100" => 
 PolyB_tmp(3071 downto 3008) <= FIFO_din;
-        when "0011000011" => 
+        when "0001111101" => 
 PolyB_tmp(3135 downto 3072) <= FIFO_din;
-        when "0011000100" => 
+        when "0001111110" => 
 PolyB_tmp(3199 downto 3136) <= FIFO_din;
-        when "0011000101" => 
+        when "0001111111" => 
 PolyB_tmp(3263 downto 3200) <= FIFO_din;
-        when "0011000110" => 
+        when "0010000000" => 
 PolyB_tmp(3327 downto 3264) <= FIFO_din;
-        when "0011000111" => 
+        when "0010000001" => 
 PolyB_tmp(3391 downto 3328) <= FIFO_din;
-        when "0011001000" => 
+        when "0010000010" => 
 PolyB_tmp(3455 downto 3392) <= FIFO_din;
-        when "0011001001" => 
-PolyB_tmp(3519 downto 3456) <= FIFO_din;
-        when "0011001010" => 
-PolyB_tmp(3583 downto 3520) <= FIFO_din;
-        when "0011001011" => 
-PolyB_tmp(3647 downto 3584) <= FIFO_din;
-        when "0011001100" => 
-PolyB_tmp(3711 downto 3648) <= FIFO_din;
-        when "0011001101" => 
-PolyB_tmp(3775 downto 3712) <= FIFO_din;
-        when "0011001110" => 
-PolyB_tmp(3839 downto 3776) <= FIFO_din;
-        when "0011001111" => 
-PolyB_tmp(3903 downto 3840) <= FIFO_din;
-        when "0011010000" => 
-PolyB_tmp(3967 downto 3904) <= FIFO_din;
-        when "0011010001" => 
-PolyB_tmp(4031 downto 3968) <= FIFO_din;
-        when "0011010010" => 
-PolyB_tmp(4095 downto 4032) <= FIFO_din;
-        when "0011010011" => 
-PolyB_tmp(4159 downto 4096) <= FIFO_din;
-        when "0011010100" => 
-PolyB_tmp(4223 downto 4160) <= FIFO_din;
-        when "0011010101" => 
-PolyB_tmp(4287 downto 4224) <= FIFO_din;
-        when "0011010110" => 
-PolyB_tmp(4351 downto 4288) <= FIFO_din;
-        when "0011010111" => 
-PolyB_tmp(4415 downto 4352) <= FIFO_din;
-        when "0011011000" => 
-PolyB_tmp(4479 downto 4416) <= FIFO_din;
-        when "0011011001" => 
-PolyB_tmp(4543 downto 4480) <= FIFO_din;
-        when "0011011010" => 
-PolyB_tmp(4607 downto 4544) <= FIFO_din;
-        when "0011011011" => 
-PolyB_tmp(4671 downto 4608) <= FIFO_din;
-        when "0011011100" => 
-PolyB_tmp(4735 downto 4672) <= FIFO_din;
-        when "0011011101" => 
-PolyB_tmp(4799 downto 4736) <= FIFO_din;
-        when "0011011110" => 
-PolyB_tmp(4863 downto 4800) <= FIFO_din;
-        when "0011011111" => 
-PolyB_tmp(4927 downto 4864) <= FIFO_din;
-        when "0011100000" => 
-PolyB_tmp(4991 downto 4928) <= FIFO_din;
-        when "0011100001" => 
-PolyB_tmp(5055 downto 4992) <= FIFO_din;
-        when "0011100010" => 
-PolyB_tmp(5119 downto 5056) <= FIFO_din;
-        when "0011100011" => 
-PolyB_tmp(5183 downto 5120) <= FIFO_din;
-        when "0011100100" => 
-PolyB_tmp(5247 downto 5184) <= FIFO_din;
-        when "0011100101" => 
-PolyB_tmp(5311 downto 5248) <= FIFO_din;
-        when "0011100110" => 
-PolyB_tmp(5375 downto 5312) <= FIFO_din;
-        when "0011100111" => 
-PolyB_tmp(5439 downto 5376) <= FIFO_din;
-        when "0011101000" => 
-PolyB_tmp(5503 downto 5440) <= FIFO_din;
-        when "0011101001" => 
-PolyB_tmp(5567 downto 5504) <= FIFO_din;
-        when "0011101010" => 
-PolyB_tmp(5631 downto 5568) <= FIFO_din;
-        when "0011101011" => 
-PolyB_tmp(5695 downto 5632) <= FIFO_din;
-        when "0011101100" => 
-PolyB_tmp(5759 downto 5696) <= FIFO_din;
-        when "0011101101" => 
-PolyB_tmp(5823 downto 5760) <= FIFO_din;
-        when "0011101110" => 
-PolyB_tmp(5887 downto 5824) <= FIFO_din;
-        when "0011101111" => 
-PolyB_tmp(5951 downto 5888) <= FIFO_din;
-        when "0011110000" => 
-PolyB_tmp(6015 downto 5952) <= FIFO_din;
-        when "0011110001" => 
-PolyB_tmp(6079 downto 6016) <= FIFO_din;
-        when "0011110010" => 
-PolyB_tmp(6143 downto 6080) <= FIFO_din;
-        when "0011110011" => 
-PolyB_tmp(6207 downto 6144) <= FIFO_din;
-        when "0011110100" => 
-PolyB_tmp(6271 downto 6208) <= FIFO_din;
-        when "0011110101" => 
-PolyB_tmp(6335 downto 6272) <= FIFO_din;
-        when "0011110110" => 
-PolyB_tmp(6399 downto 6336) <= FIFO_din;
-        when "0011110111" => 
-PolyB_tmp(6463 downto 6400) <= FIFO_din;
-        when "0011111000" => 
-PolyB_tmp(6527 downto 6464) <= FIFO_din;
-        when "0011111001" => 
-PolyB_tmp(6591 downto 6528) <= FIFO_din;
-        when "0011111010" => 
-PolyB_tmp(6655 downto 6592) <= FIFO_din;
-        when "0011111011" => 
-PolyB_tmp(6719 downto 6656) <= FIFO_din;
-        when "0011111100" => 
-PolyB_tmp(6783 downto 6720) <= FIFO_din;
-        when "0011111101" => 
-PolyB_tmp(6847 downto 6784) <= FIFO_din;
-        when "0011111110" => 
-PolyB_tmp(6911 downto 6848) <= FIFO_din;
-        when "0011111111" => 
-PolyB_tmp(6975 downto 6912) <= FIFO_din;
-        when "0100000000" => 
-PolyB_tmp(7039 downto 6976) <= FIFO_din;
-        when "0100000001" => 
-PolyB_tmp(7103 downto 7040) <= FIFO_din;
-        when "0100000010" => 
-PolyB_tmp(7167 downto 7104) <= FIFO_din;
-        when "0100000011" => 
-PolyB_tmp(7231 downto 7168) <= FIFO_din;
-        when "0100000100" => 
-PolyB_tmp(7295 downto 7232) <= FIFO_din;
-        when "0100000101" => 
-PolyB_tmp(7359 downto 7296) <= FIFO_din;
-        when "0100000110" => 
-PolyB_tmp(7423 downto 7360) <= FIFO_din;
-        when "0100000111" => 
-PolyB_tmp(7487 downto 7424) <= FIFO_din;
-        when "0100001000" => 
-PolyB_tmp(7551 downto 7488) <= FIFO_din;
-        when "0100001001" => 
-PolyB_tmp(7615 downto 7552) <= FIFO_din;
-        when "0100001010" => 
-PolyB_tmp(7679 downto 7616) <= FIFO_din;
-        when "0100001011" => 
+        when "0010000011" => 
 PolyR_tmp(63 downto 0) <= FIFO_din;
-        when "0100001100" => 
+        when "0010000100" => 
 PolyR_tmp(127 downto 64) <= FIFO_din;
-        when "0100001101" => 
+        when "0010000101" => 
 PolyR_tmp(191 downto 128) <= FIFO_din;
-        when "0100001110" => 
+        when "0010000110" => 
 PolyR_tmp(255 downto 192) <= FIFO_din;
-        when "0100001111" => 
+        when "0010000111" => 
 PolyR_tmp(319 downto 256) <= FIFO_din;
-        when "0100010000" => 
+        when "0010001000" => 
 PolyR_tmp(383 downto 320) <= FIFO_din;
-        when "0100010001" => 
+        when "0010001001" => 
 PolyR_tmp(447 downto 384) <= FIFO_din;
-        when "0100010010" => 
+        when "0010001010" => 
 PolyR_tmp(511 downto 448) <= FIFO_din;
-        when "0100010011" => 
+        when "0010001011" => 
 PolyR_tmp(575 downto 512) <= FIFO_din;
-        when "0100010100" => 
+        when "0010001100" => 
 PolyR_tmp(639 downto 576) <= FIFO_din;
-        when "0100010101" => 
+        when "0010001101" => 
 PolyR_tmp(703 downto 640) <= FIFO_din;
-        when "0100010110" => 
+        when "0010001110" => 
 PolyR_tmp(767 downto 704) <= FIFO_din;
-        when "0100010111" => 
+        when "0010001111" => 
 PolyR_tmp(831 downto 768) <= FIFO_din;
-        when "0100011000" => 
+        when "0010010000" => 
 PolyR_tmp(895 downto 832) <= FIFO_din;
-        when "0100011001" => 
+        when "0010010001" => 
 PolyR_tmp(959 downto 896) <= FIFO_din;
-        when "0100011010" => 
+        when "0010010010" => 
 PolyR_tmp(1023 downto 960) <= FIFO_din;
-        when "0100011011" => 
-PolyR_tmp(1087 downto 1024) <= FIFO_din;
-        when "0100011100" => 
-PolyR_tmp(1151 downto 1088) <= FIFO_din;
-        when "0100011101" => 
-PolyR_tmp(1215 downto 1152) <= FIFO_din;
-        when "0100011110" => 
-PolyR_tmp(1279 downto 1216) <= FIFO_din;
-        when "0100011111" => 
-PolyR_tmp(1343 downto 1280) <= FIFO_din;
-        when "0100100000" => 
-PolyR_tmp(1407 downto 1344) <= FIFO_din;
-        when "0100100001" => 
-PolyR_tmp(1471 downto 1408) <= FIFO_din;
-        when "0100100010" => 
-PolyR_tmp(1535 downto 1472) <= FIFO_din;
-        when "0100100011" => 
-PolyR_tmp(1599 downto 1536) <= FIFO_din;
-        when "0100100100" => 
-PolyR_tmp(1663 downto 1600) <= FIFO_din;
-        when "0100100101" => 
-PolyR_tmp(1727 downto 1664) <= FIFO_din;
-        when "0100100110" => 
+        when "0010010011" => 
 Message_tmp(63 downto 0) <= FIFO_din;
-        when "0100100111" => 
+data_ready <= '1';
+        when "0010010100" => 
 Message_tmp(127 downto 64) <= FIFO_din;
-        when "0100101000" => 
-Message_tmp(191 downto 128) <= FIFO_din;
 data_ready <= '1';
 --==========   INPUT DEC  ================
-    when "0100101001" => 
+    when "0010010101" => 
 ctV_tmp(63 downto 0) <= FIFO_din;
-data_ready <= '0';
-    when "0100101010" => 
+    when "0010010110" => 
 ctV_tmp(127 downto 64) <= FIFO_din;
-    when "0100101011" => 
+    when "0010010111" => 
 ctV_tmp(191 downto 128) <= FIFO_din;
-    when "0100101100" => 
+    when "0010011000" => 
 ctV_tmp(255 downto 192) <= FIFO_din;
-    when "0100101101" => 
+    when "0010011001" => 
 ctV_tmp(319 downto 256) <= FIFO_din;
-    when "0100101110" => 
+    when "0010011010" => 
 ctV_tmp(383 downto 320) <= FIFO_din;
-    when "0100101111" => 
-ctV_tmp(447 downto 384) <= FIFO_din;
-    when "0100110000" => 
-ctV_tmp(511 downto 448) <= FIFO_din;
-    when "0100110001" => 
-ctV_tmp(575 downto 512) <= FIFO_din;
-    when "0100110010" => 
-ctV_tmp(639 downto 576) <= FIFO_din;
-    when "0100110011" => 
-ctV_tmp(703 downto 640) <= FIFO_din;
-    when "0100110100" => 
-ctV_tmp(767 downto 704) <= FIFO_din;
-    when "0100110101" => 
-ctV_tmp(831 downto 768) <= FIFO_din;
-    when "0100110110" => 
-ctV_tmp(895 downto 832) <= FIFO_din;
-    when "0100110111" => 
-ctV_tmp(959 downto 896) <= FIFO_din;
+    when "0010011011" => 
+XEf_in_tmp(0 to 63) <= FIFO_din;
+    when "0010011100" => 
+XEf_in_tmp(64 to 127) <= FIFO_din;
+    when "0010011101" => 
+XEf_in_tmp(128 to 191) <= FIFO_din;
 data_ready <= '1';
          when others =>
      end case;
  end if;
 end process;
+
+
 ---==========   OUTPUT  ================
 process(clk)
 begin
@@ -994,177 +697,31 @@ FIFO_dout <= FirstPart_tmp(3391 downto 3328);
         when "00110101" => 
 FIFO_dout <= FirstPart_tmp(3455 downto 3392);
         when "00110110" => 
-FIFO_dout <= FirstPart_tmp(3519 downto 3456);
-        when "00110111" => 
-FIFO_dout <= FirstPart_tmp(3583 downto 3520);
-        when "00111000" => 
-FIFO_dout <= FirstPart_tmp(3647 downto 3584);
-        when "00111001" => 
-FIFO_dout <= FirstPart_tmp(3711 downto 3648);
-        when "00111010" => 
-FIFO_dout <= FirstPart_tmp(3775 downto 3712);
-        when "00111011" => 
-FIFO_dout <= FirstPart_tmp(3839 downto 3776);
-        when "00111100" => 
-FIFO_dout <= FirstPart_tmp(3903 downto 3840);
-        when "00111101" => 
-FIFO_dout <= FirstPart_tmp(3967 downto 3904);
-        when "00111110" => 
-FIFO_dout <= FirstPart_tmp(4031 downto 3968);
-        when "00111111" => 
-FIFO_dout <= FirstPart_tmp(4095 downto 4032);
-        when "01000000" => 
-FIFO_dout <= FirstPart_tmp(4159 downto 4096);
-        when "01000001" => 
-FIFO_dout <= FirstPart_tmp(4223 downto 4160);
-        when "01000010" => 
-FIFO_dout <= FirstPart_tmp(4287 downto 4224);
-        when "01000011" => 
-FIFO_dout <= FirstPart_tmp(4351 downto 4288);
-        when "01000100" => 
-FIFO_dout <= FirstPart_tmp(4415 downto 4352);
-        when "01000101" => 
-FIFO_dout <= FirstPart_tmp(4479 downto 4416);
-        when "01000110" => 
-FIFO_dout <= FirstPart_tmp(4543 downto 4480);
-        when "01000111" => 
-FIFO_dout <= FirstPart_tmp(4607 downto 4544);
-        when "01001000" => 
-FIFO_dout <= FirstPart_tmp(4671 downto 4608);
-        when "01001001" => 
-FIFO_dout <= FirstPart_tmp(4735 downto 4672);
-        when "01001010" => 
-FIFO_dout <= FirstPart_tmp(4799 downto 4736);
-        when "01001011" => 
-FIFO_dout <= FirstPart_tmp(4863 downto 4800);
-        when "01001100" => 
-FIFO_dout <= FirstPart_tmp(4927 downto 4864);
-        when "01001101" => 
-FIFO_dout <= FirstPart_tmp(4991 downto 4928);
-        when "01001110" => 
-FIFO_dout <= FirstPart_tmp(5055 downto 4992);
-        when "01001111" => 
-FIFO_dout <= FirstPart_tmp(5119 downto 5056);
-        when "01010000" => 
-FIFO_dout <= FirstPart_tmp(5183 downto 5120);
-        when "01010001" => 
-FIFO_dout <= FirstPart_tmp(5247 downto 5184);
-        when "01010010" => 
-FIFO_dout <= FirstPart_tmp(5311 downto 5248);
-        when "01010011" => 
-FIFO_dout <= FirstPart_tmp(5375 downto 5312);
-        when "01010100" => 
-FIFO_dout <= FirstPart_tmp(5439 downto 5376);
-        when "01010101" => 
-FIFO_dout <= FirstPart_tmp(5503 downto 5440);
-        when "01010110" => 
-FIFO_dout <= FirstPart_tmp(5567 downto 5504);
-        when "01010111" => 
-FIFO_dout <= FirstPart_tmp(5631 downto 5568);
-        when "01011000" => 
-FIFO_dout <= FirstPart_tmp(5695 downto 5632);
-        when "01011001" => 
-FIFO_dout <= FirstPart_tmp(5759 downto 5696);
-        when "01011010" => 
-FIFO_dout <= FirstPart_tmp(5823 downto 5760);
-        when "01011011" => 
-FIFO_dout <= FirstPart_tmp(5887 downto 5824);
-        when "01011100" => 
-FIFO_dout <= FirstPart_tmp(5951 downto 5888);
-        when "01011101" => 
-FIFO_dout <= FirstPart_tmp(6015 downto 5952);
-        when "01011110" => 
-FIFO_dout <= FirstPart_tmp(6079 downto 6016);
-        when "01011111" => 
-FIFO_dout <= FirstPart_tmp(6143 downto 6080);
-        when "01100000" => 
-FIFO_dout <= FirstPart_tmp(6207 downto 6144);
-        when "01100001" => 
-FIFO_dout <= FirstPart_tmp(6271 downto 6208);
-        when "01100010" => 
-FIFO_dout <= FirstPart_tmp(6335 downto 6272);
-        when "01100011" => 
-FIFO_dout <= FirstPart_tmp(6399 downto 6336);
-        when "01100100" => 
-FIFO_dout <= FirstPart_tmp(6463 downto 6400);
-        when "01100101" => 
-FIFO_dout <= FirstPart_tmp(6527 downto 6464);
-        when "01100110" => 
-FIFO_dout <= FirstPart_tmp(6591 downto 6528);
-        when "01100111" => 
-FIFO_dout <= FirstPart_tmp(6655 downto 6592);
-        when "01101000" => 
-FIFO_dout <= FirstPart_tmp(6719 downto 6656);
-        when "01101001" => 
-FIFO_dout <= FirstPart_tmp(6783 downto 6720);
-        when "01101010" => 
-FIFO_dout <= FirstPart_tmp(6847 downto 6784);
-        when "01101011" => 
-FIFO_dout <= FirstPart_tmp(6911 downto 6848);
-        when "01101100" => 
-FIFO_dout <= FirstPart_tmp(6975 downto 6912);
-        when "01101101" => 
-FIFO_dout <= FirstPart_tmp(7039 downto 6976);
-        when "01101110" => 
-FIFO_dout <= FirstPart_tmp(7103 downto 7040);
-        when "01101111" => 
-FIFO_dout <= FirstPart_tmp(7167 downto 7104);
-        when "01110000" => 
-FIFO_dout <= FirstPart_tmp(7231 downto 7168);
-        when "01110001" => 
-FIFO_dout <= FirstPart_tmp(7295 downto 7232);
-        when "01110010" => 
-FIFO_dout <= FirstPart_tmp(7359 downto 7296);
-        when "01110011" => 
-FIFO_dout <= FirstPart_tmp(7423 downto 7360);
-        when "01110100" => 
-FIFO_dout <= FirstPart_tmp(7487 downto 7424);
-        when "01110101" => 
-FIFO_dout <= FirstPart_tmp(7551 downto 7488);
-        when "01110110" => 
-FIFO_dout <= FirstPart_tmp(7615 downto 7552);
-        when "01110111" => 
-FIFO_dout <= FirstPart_tmp(7679 downto 7616);
-        when "01111000" => 
 FIFO_dout <= SecondPart_tmp(63 downto 0);
-        when "01111001" => 
+        when "00110111" => 
 FIFO_dout <= SecondPart_tmp(127 downto 64);
-        when "01111010" => 
+        when "00111000" => 
 FIFO_dout <= SecondPart_tmp(191 downto 128);
-        when "01111011" => 
+        when "00111001" => 
 FIFO_dout <= SecondPart_tmp(255 downto 192);
-        when "01111100" => 
+        when "00111010" => 
 FIFO_dout <= SecondPart_tmp(319 downto 256);
-        when "01111101" => 
+        when "00111011" => 
 FIFO_dout <= SecondPart_tmp(383 downto 320);
-        when "01111110" => 
-FIFO_dout <= SecondPart_tmp(447 downto 384);
-        when "01111111" => 
-FIFO_dout <= SecondPart_tmp(511 downto 448);
-        when "10000000" => 
-FIFO_dout <= SecondPart_tmp(575 downto 512);
-        when "10000001" => 
-FIFO_dout <= SecondPart_tmp(639 downto 576);
-        when "10000010" => 
-FIFO_dout <= SecondPart_tmp(703 downto 640);
-        when "10000011" => 
-FIFO_dout <= SecondPart_tmp(767 downto 704);
-        when "10000100" => 
-FIFO_dout <= SecondPart_tmp(831 downto 768);
-        when "10000101" => 
-FIFO_dout <= SecondPart_tmp(895 downto 832);
-        when "10000110" => 
-FIFO_dout <= SecondPart_tmp(959 downto 896);
-        when "10000111" => 
+        when "00111100" => 
+FIFO_dout <= XEf_out_tmp(0 to 63);
+        when "00111101" => 
+FIFO_dout <= XEf_out_tmp(64 to 127);
+        when "00111110" => 
+FIFO_dout <= XEf_out_tmp(128 to 191);
+        when "00111111" => 
 FIFO_dout <= dec_msg_tmp(63 downto 0);
-        when "10001000" => 
+        when "01000000" => 
 FIFO_dout <= dec_msg_tmp(127 downto 64);
-        when "10001001" => 
-FIFO_dout <= dec_msg_tmp(191 downto 128);
          when others =>
      end case;
  end if;
 end process;
 
 
-end R5ND_3PKE_0d;
+end R5ND_1KEM_5d;

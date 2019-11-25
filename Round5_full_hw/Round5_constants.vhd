@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use IEEE.math_real.all;
 
 library work;
-use work.R5ND_1PKE_0d_param_set.all;  --- CHANGE USED PACKAGE TO CHANGE PARAMETERS
+use work.R5ND_5PKE_5d_param_set.all;  --- CHANGE USED PACKAGE TO CHANGE PARAMETERS
 
 package Round5_constants is  -- R5ND_1KEM_0C
 
@@ -33,6 +33,7 @@ package Round5_constants is  -- R5ND_1KEM_0C
 	type q_bitsPoly is array(natural range<>) of std_logic_vector(q_bits-1 downto 0);
 	type P_bitsPoly is array(natural range<>) of std_logic_vector(p_bits-1 downto 0);
 	type t_bitsPoly	is array(natural range<>) of std_logic_vector(t_bits-1 downto 0);
+	--type IntegerArray is array(natural range<>) of integer;
     constant zero_fill      : std_logic_vector(q_bits-1 - 8 downto 0) := (others => '0');
     
     ---------------------- CONSTANTS FOR AXI WRAPPER ----
@@ -55,12 +56,18 @@ package Round5_constants is  -- R5ND_1KEM_0C
     constant FirstPart_cycle    : integer := R5_FirstPart_cycle;
     constant SecondPart_cycle	: integer := R5_SecondPart_cycle;
     constant Dec_Msg_cycle 	    : integer := R5_Dec_Msg_cycle;
-	
+	constant XEf_cycle				: integer := R5_XEf_cycle;
 	---- XEf
-	constant xef_p1				: integer := R5_xef_p1;
-	constant xef_f				: integer := R5_xef_f; -- 0 or 5
-	
-	
+--	constant xef_p1				: integer := R5_xef_p1;
+--	constant xef_f					: integer := R5_xef_f; -- 0 or 5
+	constant xef_reg_len			: IntegerArray := R5_xef_reg_len;
+	constant xef_div_boundaries: IntegerArray := R5_xef_div_boundaries;
+	constant code_len				: integer := R5_code_len;
+	--constant xef_shortest		: integer := R5_xef_shortest;
+	constant xef_shortest		: integer := 10;
+	constant xef_num_of_shifts : integer := R5_xef_num_of_shifts;
+	constant xef_num_of_fixerr : integer := R5_xef_num_of_fixerr;
+	constant xef_Extended_MessageLen : integer := xef_num_of_fixerr*xef_shortest;
 	
 	--ENC WR
 	constant Sigma_cycle_start  : integer := 0;
@@ -71,6 +78,7 @@ package Round5_constants is  -- R5ND_1KEM_0C
 	constant RHO_cycle_end 		: integer := RHO_cycle_start + RHO_cycle;
 	constant Message_cycle_start: integer := RHO_cycle_end+1;
 	constant Message_cycle_end 	: integer := Message_cycle_start + Message_cycle;
+
 	--DEC WR
 	constant Sk_cycle_start  	: integer := Message_cycle_end+1;
 	constant Sk_cycle_end 		: integer := Sk_cycle_start + Sk_cycle;
@@ -78,14 +86,17 @@ package Round5_constants is  -- R5ND_1KEM_0C
 	constant PolyU_cycle_end 	: integer := PolyU_cycle_start + PolyU_cycle;
 	constant ctV_cycle_start 	: integer := PolyU_cycle_end + 1;
 	constant ctV_cycle_end		: integer := ctV_cycle_start + ctV_cycle;
-	
+	constant XEf_cycle_start		: integer := Message_cycle_end+1;
+	constant XEf_cycle_end			: integer := XEf_cycle_start + XEf_cycle;
 	
 	
 	--ENC RD
 	constant FirstPart_cycle_start	: integer := 0;
 	constant FirstPart_cycle_end	: integer := FirstPart_cycle_start+FirstPart_cycle;
 	constant SecondPart_cycle_start : integer := FirstPart_cycle_end; -- continious data read
-	constant SecondPart_cycle_end	: integer := SecondPart_cycle_start+SecondPart_cycle;	
+	constant SecondPart_cycle_end	: integer := SecondPart_cycle_start+SecondPart_cycle;
+
+	
 	--DEC RD
 	constant Dec_Msg_cycle_start 	: integer := SecondPart_cycle_end+1;
 	constant Dec_Msg_cycle_end		: integer := Dec_Msg_cycle_start+Dec_Msg_cycle;

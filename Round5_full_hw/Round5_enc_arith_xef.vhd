@@ -7,13 +7,14 @@ use ieee.numeric_std.all;
 library work;
 use work.Round5_constants.all;
 
-entity Round5_enc_arith is	
+entity Round5_enc_arith_xef is	
 	port (
 		PolyA			: in q_bitsPoly(PolyDegree-1 downto 0);  --W enc: A
 		PolyB			: in p_bitsPoly(PolyDegree downto 0);	--W enc: polyB,   W dec: polyU
 		PolyR			: in Trinomial(PolyDegree-1 downto 0); --W enc: poly R   W dec: polyS
 		Message		    : in std_logic_vector(MessageLen-1 downto 0);
 		ctV             : in t_bitsPoly(MessageLen-1  downto 0);
+      XEf_code_in	: in std_logic_vector(0 to code_len-1); 
         
 		clk			: in std_logic;
 		Start			: in std_logic;
@@ -23,6 +24,7 @@ entity Round5_enc_arith is
         
 		FirstPart	: out p_bitsPoly(PolyDegree-1 downto 0);
 		SecondPart	: out t_bitsPoly(MessageLen-1  downto 0);
+      Xef_code_out: out std_logic_vector(0 to code_len-1);
 		
 		Dec_Msg		: out std_logic_vector(MessageLen-1 downto 0)
 		
@@ -30,7 +32,7 @@ entity Round5_enc_arith is
 end entity;
 
 
-architecture a1 of Round5_enc_arith is
+architecture a1 of Round5_enc_arith_xef is
 
 component Mul_Poly is 
 	port (
@@ -101,15 +103,17 @@ signal arithm_result : p_bitsPoly(MessageLen-1 downto 0);
 signal arithm_result_q : q_bitsPoly(PolyDegree downto 0);
 
 signal rounding_const : std_logic_vector(7 downto 0);
-type FSM_type is (idle, init, first_mul_enc, first_round_enc, second_mul_enc, second_round_enc, after_encryption, mult_dec, sub_dec, round_dec, after_decryption);
+type FSM_type is (idle, init, first_mul_enc, first_round_enc, second_mul_enc, second_round_enc, after_encryption, mult_dec, sub_dec, round_dec, after_decryption,after_codes);
 signal FSM : FSM_type := idle;
 
 signal AddedMessage	: t_bitsPoly(MessageLen-1 downto 0);
 signal Reversed_Messsage    : std_logic_vector(0 to MessageLen-1);
 signal Ordered_Message      : std_logic_vector(0 to MessageLen-1);
 signal p_bits_poly_memory_register_1 : P_bitsPoly(PolyDegree downto 0);
-
-
+signal xef_mode, xef_start : std_logic;
+signal code_computed_flag, code_fixed_flag : std_logic;
+signal xef_message_out : std_logic_vector(0 to MessageLen-1);
+signal Message_2_XEf : std_logic_vector(0 to MessageLen-1);
 begin
 
 ------------------------------------	STATE MACHINE ----------------
@@ -167,7 +171,11 @@ begin
 				FSM <= after_decryption;
 			
 			when after_decryption =>
-				Dec_Msg <= Rounded_d1(PolyDegree downto PolyDegree-MessageLen+1);
+				if code_fixed_flag = '1' then
+					FSM <= after_codes;
+				end if;
+			when after_codes =>
+				Dec_Msg <= XEf_message_out;
 				Done <= '1';
 			when others =>
 				FSM <= idle;
@@ -176,6 +184,27 @@ begin
 			
 	end if;
 end process;
+
+---------------- SIGNALS TO XEF CODES --------------------------
+xef_proces: process(clk)
+begin
+	if clk'event and clk = '1' then
+		if FSM = first_mul_enc then
+			xef_start <= '1';
+			xef_mode <= '0';
+			Message_2_XEf <= Message;
+			
+		elsif FSM = after_decryption then
+			Message_2_XEf <=  Rounded_d1(PolyDegree downto PolyDegree-MessageLen+1);
+			xef_mode <= '1';
+			xef_start <= '1';
+		else
+			xef_start <= '0';
+		end if;
+	end if;
+end process;
+
+
 
 
 ----------------	SIGNALS TO MULTIPLY	-------------------------
@@ -344,5 +373,21 @@ end process;
 		clk 	=> clk,
 		PolyC => arithm_result
 	);
+	
+	xfc: XEf_codes port map(
+		InputMsg			=> Message_2_XEf,
+		InputCodeword  => XEf_code_in,
+		mode				=> xef_mode,
+		rst 				=> reset,
+		start				=> xef_start,
+		clk 				=> clk,
+		
+		Code_computed	=> code_computed_flag,
+		Code_fixed		=> code_fixed_flag,
+		
+		OutputMsg 		=> XEf_message_out,
+		OutputCode		=> XEf_code_out
+	);
+
 
 end a1;
