@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use IEEE.math_real.all;
 
 library work;
-use work.R5ND_5PKE_5d_param_set.all;  --- CHANGE USED PACKAGE TO CHANGE PARAMETERS
+use work.R5ND_5KEM_0d_param_set.all;  --- CHANGE USED PACKAGE TO CHANGE PARAMETERS
 
 package Round5_constants is  -- R5ND_1KEM_0C
 

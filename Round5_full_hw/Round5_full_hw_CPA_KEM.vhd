@@ -85,7 +85,7 @@ aead_clk <= clk;
 arithm_clk <= clk;
 
 
-	arithm: entity work.Round5_enc_arith_wrapper(R5ND_1KEM_5d_sipopiso)
+	arithm: entity work.Round5_enc_arith_wrapper(R5ND_5KEM_0d)
 		port map(
 			clk => arithm_clk,
 			rst => arithm_rst,

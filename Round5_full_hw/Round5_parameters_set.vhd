@@ -21,15 +21,16 @@ package R5ND_1KEM_0d_param_set is
 	constant R5_PolyB_cycle	: integer := 78;  -- ceiling((PolyDegree+1)*p_bits))/64)
 	constant R5_PolyR_cycle	: integer := 20;
 	constant R5_RHO_cycle		: integer := 2;
-    constant R5_Message_cycle 	: integer := 2;
+   constant R5_Message_cycle 	: integer := 2;
 	constant R5_Sk_cycle		: integer := 2;
 	constant R5_PolyU_cycle	: integer := 78; --ceiling (PolyDegree*p_bits/64)
 	constant R5_ctV_cycle		: integer := 8;  --ceiling (t_bits*MessageLen/64)
 	
-    constant R5_FirstPart_cycle    : integer := 78;
-    constant R5_SecondPart_cycle	: integer := 8;
-    constant R5_Dec_Msg_cycle 	    : integer := 2;
-	
+   constant R5_FirstPart_cycle    : integer := 78;
+   constant R5_SecondPart_cycle	: integer := 8;
+   constant R5_Dec_Msg_cycle 	    : integer := 2;
+	constant R5_XEf_cycle			: integer := 4; -- ceiling(code_len/64) (if no XEf = 0)
+
 	------------- CONSTANTS FOR ROUNDING ------
 	constant R5_p_PolyMask		: std_logic_vector(R5_q_bits-1 downto 0) := "00011111111";
 	constant R5_b_mask_enc1 	: std_logic_vector(R5_q_bits-1 downto 0) := "00011111111";
@@ -77,10 +78,11 @@ package R5ND_3KEM_0d_param_set is
 	constant R5_PolyU_cycle	: integer := 111; --ceiling (PolyDegree*p_bits/64)
 	constant R5_ctV_cycle		: integer := 12;  --ceiling (t_bits*MessageLen/64)
 	
-    constant R5_FirstPart_cycle    : integer := 111;
-    constant R5_SecondPart_cycle	: integer := 12;
-    constant R5_Dec_Msg_cycle 	    : integer := 3;
-	
+   constant R5_FirstPart_cycle    : integer := 111;
+   constant R5_SecondPart_cycle	: integer := 12;
+   constant R5_Dec_Msg_cycle 	    : integer := 3;
+	constant R5_XEf_cycle			: integer := 4; -- ceiling(code_len/64) (if no XEf = 0)
+
 	------------- CONSTANTS FOR ROUNDING ------
 	constant R5_p_PolyMask		: std_logic_vector(R5_q_bits-1 downto 0) := "0000111111111";
 	constant R5_b_mask_enc1 	: std_logic_vector(R5_q_bits-1 downto 0) := "0000111111111";
@@ -131,6 +133,7 @@ package R5ND_5KEM_0d_param_set is
     constant R5_FirstPart_cycle    : integer := 144;
     constant R5_SecondPart_cycle	: integer := 16;
     constant R5_Dec_Msg_cycle 	    : integer := 4;
+	constant R5_XEf_cycle			: integer := 4; -- ceiling(code_len/64) (if no XEf = 0)
 
 	------------- CONSTANTS FOR ROUNDING ------
 	constant R5_p_PolyMask	: std_logic_vector(R5_q_bits-1 downto 0) := "00000111111111";
